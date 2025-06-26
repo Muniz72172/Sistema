@@ -1,0 +1,118 @@
+“Admin de Ônibus” – Nova Interface
+
+🚪 Fluxo Inicial – Acesso Administrativo de Ônibus (Atualizado)
+1. loginAdmin.html
+Campos: NIP, Senha
+
+Ações:
+
+Entrar → envia nip + senha (SHA‑256 + Base64) para validarLoginAdminOnibus(nip, hash)
+
+Requer SENHA_HASH preenchido e ATIVO = SIM
+
+Link “Primeiro acesso? Cadastre sua senha” → redireciona para ?page=validarCadastroAdminOnibus
+
+2. validarCadastroAdminOnibus.html
+Campo único: NIP
+
+Verificações (Apps Script): buscarCadastroAdminOnibus(nip)
+
+Existe na aba LoginAdminOnibus?
+
+Está com ATIVO = SIM?
+
+Campo SENHA_HASH está em branco?
+
+Resultado:
+
+Se OK:
+
+Armazena em sessionStorage: nipCadastroAdmin, nomeCadastroAdmin, emailCadastroAdmin
+
+Redireciona para ?page=cadastroSenhaAdminOnibus
+
+Se NÃO:
+
+Alerta: “NIP não autorizado ou já cadastrado.”
+
+3. cadastroSenhaAdminOnibus.html
+Campos (preenchidos automaticamente com sessionStorage):
+
+NIP, Nome, Email (readonly)
+
+Nova Senha, Confirmar Senha
+
+Regras:
+
+Senhas devem coincidir
+
+Hash gerado no cliente e enviado para registrarSenhaAdminOnibus(nip, hash)
+
+SENHA_HASH e CADASTRADO_EM atualizados
+
+Ao finalizar:
+
+Limpa sessionStorage (nipCadastroAdmin, nomeCadastroAdmin, emailCadastroAdmin)
+
+Redireciona para ?page=loginAdmin
+
+🔐 Segurança
+Autenticação com criptografia SHA‑256 + Base64 (no cliente)
+
+SessionStorage local para dados temporários
+
+Acesso ao painel adminOnibus.html somente com sessionStorage válido
+
+Roteamento controlado via doGet(e) com ?page=
+
+
+
+🧑‍💼 Tela “Admin de Ônibus” – Nova Interface
+Nome do HTML: adminOnibus.html
+Script associado: AdminOnibus.gs
+
+Acessível somente por: usuários com perfil adminOnibus
+
+🧩 Funcionalidades
+Filtro por Data e Destino
+
+Seleção dinâmica via input date e select.
+
+Gerenciar Datas de Agendamento
+
+Leitura/escrita em ConfigOnibus.
+
+Liberação manual por destino e data.
+
+Listar Agendados
+
+Nome, NIP, Assento, PCD, Acompanhante.
+
+Botões: Cancelar, Lançar Falta (com justificativa).
+
+Listar Fila de Espera (Reservas)
+
+Ordem, PCD.
+
+Ações: Promover (manual), Cancelar.
+
+Liberação Dirigida de Assento Cinza
+
+Indicar data, assento, nip, justificativa.
+
+Libera assento específico apenas para NIP informado.
+
+Gerar Lista de Presença
+
+Layout para impressão.
+
+Campos: Nº, NIP, Nome, Assento, PCD, Acompanhante, Assinatura.
+
+Gera log automático em Registro_Onibus.
+
+📂 Scripts a Serem Criados
+Script	Funções principais
+AdminOnibus.gs	getAgendados(), cancelarPorAdmin(), lancarFalta(), promoverReserva(), liberarAssentoParaUsuario(), gerarListaPresenca(), registrarEventoOnibus()
+Utilitarios.gs	Verificar perfil, formatar datas, validar sessão
+doGet(e)	Direcionamento dinâmico de acordo com perfil ou ?page=
+

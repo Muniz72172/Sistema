@@ -1,0 +1,260 @@
+🧭 Sistema Web de Marcação de Ônibus – PNSPA (Versão 2025)
+🔐 1. Acesso ao Sistema
+O acesso inicial se dá via login.html, com validação por NIP e senha criptografada (SHA‑256 + Base64).
+
+Senha verificada em UsuariosCadastrados (público geral) ou LoginAdminOnibus (painel de administração).
+
+Validação considera status ativo e consistência com a base FUSMAOFF.
+
+Roteamento controlado via ?page= e função doGet(e).
+
+🆕 2. Cadastro Validado
+Para novos usuários:
+
+cadastroValidacao.html cruza NIP + data de nascimento com a aba ValidacaoFusma.
+
+Após validação, cadastroFinal.html conclui o registro.
+
+Dados vão para UsuariosCadastrados e logs em LogsCadastro.
+
+⚙️ 3. Menu Principal – menu.html
+Tela inicial para usuários autenticados:
+
+Botões: Marcar Ônibus, Meus Agendamentos, Alterar Cadastro, Sair.
+
+Avisos dinâmicos (aba Avisos) apresentados conforme relevância.
+
+🚌 4. Marcação de Ônibus – onibus.html
+4.1 Escolha da Data e Verificação
+Datas ativas são carregadas da aba ConfigOnibus.
+
+Usuário só pode marcar 1 viagem por data.
+
+Se ônibus estiver lotado, exibe opção de entrar na Fila de Espera.
+
+4.2 Fluxo com Vaga Disponível
+Seleção visual de assentos (mapa).
+
+Flags: PCD, acompanhante.
+
+Fluxo:
+
+instrucoesOnibus.html
+
+formularioOnibus[Com|Sem]Acompanhante.html
+
+Confirmação → registrarAgendamento()
+
+Registros: Agendamentos, HistoricoUsuarios, HistoricoGeralUsuarios.
+
+4.3 Fluxo de Fila de Espera
+Entrada quando ônibus estiver lotado.
+
+Fluxo registra como Reserva, com assento R01, R02 etc.
+
+Função registrarFilaDeEspera() grava também em LogsFilaEspera.
+
+🪑 5. Regras da Fila de Espera
+Promoção automática: até 24h antes da viagem (processarAlocacaoFilaDiaria()).
+
+Após 24h: promoção apenas presencialmente pelo admin.
+
+Assentos 3 e 4 têm prioridade para PCDs.
+
+👀 6. Meus Agendamentos – meusAgendamentos.html
+Exibe agendamentos e reservas do usuário.
+
+Destaque visual: ✅ Confirmado | 🕗 Reserva
+
+Botão “Cancelar” → remove do sistema e aciona promoção da fila.
+
+🔄 7. Cancelamento
+Pode ser feito pelo usuário ou pelo admin.
+
+Atualiza logs e chama processarAlocacaoFilaDiaria() se aplicável.
+
+📋 8. Painel Administrativo – Nova Interface
+🚪 Acesso de Administrador
+Via loginAdmin.html, com NIP e senha.
+
+“Primeiro acesso” passa por:
+
+validarCadastroAdminOnibus.html
+
+cadastroSenhaAdminOnibus.html
+
+🧑‍💼 adminOnibus.html
+Funções principais do painel:
+
+Função	Descrição
+Filtro de Data e Destino	Permite selecionar a operação que será gerenciada
+Gerenciar Datas	Lê e escreve em ConfigOnibus (ativa/inativa datas específicas)
+Listar Agendados	Exibe passageiros confirmados, com opções para Cancelar ou Lançar Falta
+Listar Fila de Espera	Exibe reservas, permite Promover ou Cancelar
+Liberação de Assento Dirigida	Libera assento cinza (43–46) para um NIP específico com justificativa
+Gerar Lista de Presença	Gera documento com NIP, nome, assento, PCD, acompanhante e campo de assinatura
+
+🔐 Segurança e Controle
+Painel acessível somente com sessionStorage válido (nipAdminOnibus, nomeAdminOnibus)
+
+Logs de todas as ações são gravados em Registro_Onibus
+
+Senhas criptografadas e validadas no back-end
+
+Auditoria total via histórico, inclusive para admins
+
+📂 Scripts e Abas Envolvidas
+📜 Scripts
+Login.gs, CadastroValidado.gs, MarcacaoOnibus.gs, AdminOnibus.gs, MeusAgendamentos.gs, Utilitarios.gs
+
+📑 Abas da planilha
+UsuariosCadastrados, Agendamentos, Reservas, ConfigOnibus, HistoricoUsuarios, HistoricoGeralUsuarios, Registro_Onibus, Cancelamentos, LoginAdminOnibus, AssentosOnibus, LogsFilaEspera
+
+Mais detalhes:
+
+## Sistema Web de Marcação e Administração de Transporte - PNSPA (2025)
+
+### ✨ Visão Geral
+
+O sistema da Policlínica Naval de São Pedro da Aldeia (PNSPA) permite que militares agendem viagens de ônibus institucionais para destinos como HNMD, PNNSG e OCM. Integra funcionalidades de marcação online, controle de assentos, fila de espera e um painel administrativo seguro e rastreável, gerenciado por servidores autorizados.
+
+---
+
+### 🔐 1. Acesso e Autenticação
+
+#### A) Login Geral (`login.html`)
+
+* **Entrada**: NIP e senha criptografada (SHA-256 + Base64)
+* **Validação**: Aba `UsuariosCadastrados`, ativo e autenticado
+* **Roteamento**: `?page=menu`
+
+#### B) Cadastro Validado (`cadastroValidacao.html` > `cadastroFinal.html`)
+
+* Verificação cruzada com base `FUSMAOFF` (aba `ValidacaoFusma`)
+* Após validação: cria login e senha com consentimento LGPD
+
+#### C) Login Administrativo (`loginAdmin.html`)
+
+* Acesso restrito a administradores cadastrados na aba `LoginAdminOnibus`
+* Link "Primeiro acesso" redireciona para `validarCadastroAdminOnibus.html`
+
+---
+
+### 📅 2. Marcação de Ônibus
+
+#### A) Tela `onibus.html`
+
+* Carrega datas ativas da aba `ConfigOnibus`
+* Gatilho de checagem para impedir agendamentos duplicados
+* Fluxos diferenciados para viagens **com** ou **sem acompanhante**
+
+#### B) Com vaga disponível
+
+1. Tela `instrucoesOnibus.html`
+2. Tela de formulário (com ou sem acompanhante)
+3. Envio para `registrarAgendamento()`
+4. Registra em:
+
+   * `Agendamentos`
+   * `HistoricoUsuarios`
+   * `HistoricoGeralUsuarios`
+   * `Registro_Onibus`
+
+#### C) Sem vaga - Fila de Espera
+
+* Exibe opção de reserva com assento `R01`, `R02` etc.
+* Registra em `Reservas` e `LogsFilaEspera`
+
+---
+
+### 🚌 3. Fila de Espera
+
+* Regra: promoção até 24h antes feita por `processarAlocacaoFilaDiaria()`
+* Promoções após isso só manualmente pelo admin
+* Assentos 3 e 4 priorizam PCD
+
+---
+
+### ✅ 4. Meus Agendamentos
+
+* Tela `meusAgendamentos.html`
+* Exibe:
+
+  * Confirmados (✅)
+  * Reservas (🕗)
+* Permite cancelamento com rastreabilidade e aciona promoção
+
+---
+
+### 👥 5. Cadastro de Admins
+
+* Tela `validarCadastroAdminOnibus.html` verifica:
+
+  * NIP existente
+  * ATIVO = SIM
+  * SENHA\_HASH em branco
+* Se aprovado, redireciona para `cadastroSenhaAdminOnibus.html`
+* Armazena:
+
+  * `nipCadastroAdmin`, `nomeCadastroAdmin`, `emailCadastroAdmin` em `sessionStorage`
+
+---
+
+### 📄 6. Logs e Auditoria
+
+* Toda ação é registrada em `Registro_Onibus`
+* Campos:
+
+  * acao, status anterior/atual, nip, nome, data, destino, assento, origem, observacao
+* Logs específicos também em `LogsFilaEspera`, `HistoricoUsuarios`, `Cancelamentos`
+
+---
+
+### 👩‍💻 7. Painel Administrativo (`adminOnibus.html`)
+
+#### 🌐 Requisitos de acesso
+
+* `sessionStorage` com `nipAdminOnibus` e `nomeAdminOnibus`
+* Roteado por `?page=adminOnibus`
+
+#### 🔹 Funções Disponíveis
+
+| Função                     | Descrição                                                           |
+| -------------------------- | ------------------------------------------------------------------- |
+| **Filtro de Data/Destino** | Define operação corrente                                            |
+| **Gerenciar Datas**        | Aba `ConfigOnibus`: ativar/inativar datas para marcação             |
+| **Listar Agendados**       | Lista passageiros, permite `Cancelar` ou `Lancar Falta`             |
+| **Fila de Espera**         | Permite `Promover` ou `Cancelar reservas`                           |
+| **Liberação Dirigida**     | Libera assento para um NIP específico com justificativa             |
+| **Lista de Presença**      | Gera documento com nome/NIP/assento/PCD/assinatura para cada viagem |
+
+---
+
+### ⚖️ 8. Segurança e Conformidade
+
+* Criptografia de senha no cliente
+* Validação dupla em Apps Script (login e permissões)
+* Controle total por sessionStorage
+* Conformidade com LGPD: consentimento e finalidade clara
+
+---
+
+### 📁 9. Estrutura de Código
+
+#### Scripts Principais
+
+* `Login.gs`, `CadastroValidado.gs`, `MarcacaoOnibus.gs`, `AdminOnibus.gs`, `Utilitarios.gs`, `Controlador.gs`
+
+#### HTMLs Associados
+
+* login, cadastroValidacao, cadastroFinal, onibus, meusAgendamentos, adminOnibus, loginAdmin, validarCadastroAdminOnibus, cadastroSenhaAdminOnibus
+
+#### Abas da Planilha
+
+* `UsuariosCadastrados`, `LoginAdminOnibus`, `Agendamentos`, `Reservas`, `HistoricoUsuarios`, `Registro_Onibus`, `Cancelamentos`, `ConfigOnibus`, `AssentosOnibus`, `LogsFilaEspera`, `Avisos`
+
+---
+
+### ✅ Conclusão
+
+O sistema da PNSPA proporciona uma solução digital robusta, segura e auditável para o gerenciamento de transporte institucional, atendendo normas militares e requisitos modernos de usabilidade, acessibilidade e LGPD. A nova interface administrativa amplia o controle e a eficiência dos gestores da rotina de ônibus.
