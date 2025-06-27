@@ -1,0 +1,23 @@
+Estamos desenvolvendo um painel administrativo web para gestão de agendamento de ônibus utilizando Google Apps Script (GAS) como backend e HTML/JavaScript com Bootstrap no frontend. O sistema será utilizado por administradores para controlar datas, passageiros, lista de espera, relatórios e demais rotinas relacionadas ao transporte.
+
+Fluxo e estrutura do sistema:
+
+    O painel principal (“adminOnibus.html”) apresenta um menu moderno e responsivo, com opções como: Gerenciar Datas de Agendamento, Listar Passageiros Agendados, Listar Fila de Espera, Liberação Dirigida de Assento, Lista de Presença, Relatórios e Ajuda.
+    Cada opção do menu redireciona para uma subpágina HTML, utilizando roteamento controlado via parâmetro ?page=... no endereço do Web App do Google Apps Script.
+    O roteamento das páginas é feito no arquivo RotasAdmin.gs, que devolve a página HTML correta conforme o parâmetro recebido.
+    Para garantir o funcionamento correto (sem tela branca ou falhas de navegação), o redirecionamento das opções do menu está sendo feito sempre de forma absoluta, utilizando o link completo do Web App, exatamente como já era feito na tela de login.
+    O login utiliza validação de NIP e senha com hash SHA-256, armazenando dados no sessionStorage para controlar o acesso às telas restritas.
+
+A etapa atual do projeto:
+
+    Já conseguimos acessar a tela de Gerenciar Datas de Agendamento a partir do menu do painel administrativo, sem bugs de navegação.
+    O próximo passo é aprimorar a funcionalidade da tela Gerenciar Datas de Agendamento. Isso pode incluir:
+        Melhorias visuais e de usabilidade (layout, responsividade, feedbacks para o usuário).
+        Ajustes no fluxo de cadastro, ativação/inativação e exibição das datas.
+        Garantir que a comunicação com o Google Apps Script (funções para listar, adicionar, ativar/inativar datas) esteja robusta, amigável e adequada para o administrador.
+
+Resumo do objetivo geral:
+Criar uma experiência fluida, segura e eficiente para os administradores gerenciarem toda a rotina de uso dos ônibus, com interface moderna e integração total ao Google Sheets via Apps Script.
+
+Próxima etapa:
+Ajustar e melhorar a interface e experiência da tela “Gerenciar Datas de Agendamento”, garantindo que atenda plenamente as necessidades administrativas de controle de datas.
