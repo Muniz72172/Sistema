@@ -1,0 +1,113 @@
+<!-- adminOnibus.html.txt -->
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - Ônibus</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #e6eafc 0%, #fafafa 100%);
+      min-height: 100vh;
+    }
+    .admin-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.14);
+      padding: 2.5rem 2rem 2rem 2rem;
+      max-width: 480px;
+      margin: 40px auto;
+      border: none;
+    }
+    .admin-header {
+      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+    }
+    .admin-header h4 {
+      color: #375a7f;
+      font-weight: 700;
+    }
+    .admin-btn {
+      font-weight: bold;
+      transition: all 0.15s;
+      margin-bottom: 1rem;
+      font-size: 1.07rem;
+      padding: 14px 0;
+      border-radius: 12px;
+    }
+    .admin-btn i {
+      margin-right: 10px;
+      color: #375a7f;
+    }
+    .admin-btn:hover {
+      background: #f6f9ff;
+      color: #20406a;
+      box-shadow: 0 2px 12px rgba(55,90,127,0.08);
+      transform: translateY(-2px);
+    }
+    .admin-logout {
+      float: right;
+      margin-top: -8px;
+    }
+    .admin-section-title {
+      color: #375a7f;
+      font-size: 1.09rem;
+      font-weight: 600;
+      margin-top: 1.8rem;
+      margin-bottom: .7rem;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 600px) {
+      .admin-card { padding: 1.2rem 0.5rem 1.7rem 0.5rem; }
+      .admin-header h4 { font-size: 1.1rem; }
+      .admin-section-title { font-size: 1rem; }
+    }
+  </style>
+  <!-- Bootstrap icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+  <script>
+    // Troque esta URL pelo SEU link de Web App se mudar o deploy!
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
+
+    if (!sessionStorage.getItem("nipAdminOnibus") || !sessionStorage.getItem("nomeAdminOnibus")) {
+      window.location.href = "?page=loginAdminOnibus";
+    }
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "?page=loginAdminOnibus";
+    }
+    function irPara(pagina) {
+      // Redirecionamento absoluto, igual ao login
+      const a = document.createElement("a");
+      a.href = BASE_URL + "?page=" + pagina;
+      a.target = "_top";
+      a.click();
+    }
+  </script>
+  <div class="admin-card shadow">
+    <div class="admin-header d-flex justify-content-between align-items-center">
+      <h4>Painel do Administrador de Ônibus</h4>
+      <button class="btn btn-outline-danger btn-sm admin-logout" onclick="logout()">
+        <i class="bi bi-box-arrow-right"></i> Sair
+      </button>
+    </div>
+    <div>
+      <div class="admin-section-title">Gerenciamento</div>
+      <button type="button" onclick="irPara('gerenciarDatas')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-calendar2-event"></i> Gerenciar Datas de Agendamento</button>
+      <button type="button" onclick="irPara('listarAgendados')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-people"></i> Listar Passageiros Agendados</button>
+      <button type="button" onclick="irPara('filaEsperaAdmin')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-hourglass-split"></i> Listar Fila de Espera</button>
+      <button type="button" onclick="irPara('liberacaoDirigida')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-person-check"></i> Liberação Dirigida de Assento</button>
+      <button type="button" onclick="irPara('listaPresenca')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-clipboard-check"></i> Gerar Lista de Presença</button>
+      <div class="admin-section-title">Outros Recursos</div>
+      <button type="button" onclick="irPara('relatorios')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-bar-chart-line"></i> Relatórios e Estatísticas</button>
+      <button type="button" onclick="irPara('ajuda')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-question-circle"></i> Ajuda / Suporte</button>
+    </div>
+  </div>
+</body>
+</html>

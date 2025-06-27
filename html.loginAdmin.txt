@@ -1,0 +1,171 @@
+<!-- Arquivo: html.loginAdmin.html | Otimizado para uso em celular -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <title>Login Administrativo - Ônibus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <style>
+    html, body { height: 100%; }
+    body { 
+      background-color: #f5f5f5; 
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container { 
+      max-width: 100%; 
+      padding: 0 8px; 
+      margin-top: 0; 
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card { 
+      padding: 20px 10px 15px 10px; 
+      border-radius: 15px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+      text-align: center; 
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+    }
+    h5 { font-size: 1.15rem; }
+    label { font-size: 1rem; }
+    .form-group { margin-bottom: 16px; }
+    .form-control, button, input {
+      font-size: 1.05rem;
+      border-radius: 8px;
+      min-height: 44px;
+      box-shadow: none;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 2px #bce8ff;
+      border-color: #65bdfa;
+    }
+    button.btn-block {
+      padding: 12px 0;
+      font-size: 1.08rem;
+      border-radius: 8px;
+      margin-top: 4px;
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+    #msg { margin-top: 10px; color: #d32f2f; min-height: 22px; }
+    #loading { display: none; margin-top: 15px; }
+    a.d-block {
+      font-size: 0.97rem;
+      margin-bottom: 2px;
+      color: #007bff;
+      word-break: break-all;
+    }
+    @media (max-width: 500px) {
+      .card {
+        padding: 16px 4px 10px 4px;
+        max-width: 98vw;
+      }
+      h5 {
+        font-size: 1.02rem;
+      }
+    }
+    @media (max-width: 340px) {
+      .card { padding: 7px 0 6px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h5>Painel do Administrador de Ônibus</h5>
+      <form autocomplete="on" onsubmit="event.preventDefault(); entrar();">
+        <div class="form-group text-left">
+          <label for="nip">NIP</label>
+          <input type="text" id="nip" class="form-control" inputmode="numeric" autocomplete="username" maxlength="10" autocapitalize="off" autocorrect="off" required placeholder="Digite seu NIP" aria-label="NIP">
+        </div>
+        <div class="form-group text-left">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" class="form-control" autocomplete="current-password" required placeholder="Digite sua senha" aria-label="Senha">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+      <a href="https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec?page=validarCadastroAdminOnibus" class="d-block mt-2" target="_top">Primeiro acesso? Cadastre sua senha</a>
+      <div id="msg"></div>
+      <div id="loading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Verificando...</span>
+        </div>
+        <p style="font-size:0.98rem;">Verificando dados. Por favor, aguarde...</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Foco automático no NIP ao carregar
+    window.onload = function() {
+      document.getElementById('nip').focus();
+    };
+
+    function entrar() {
+      const nip = document.getElementById("nip").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+      const msg = document.getElementById("msg");
+      const loading = document.getElementById("loading");
+
+      msg.innerText = "";
+      loading.style.display = "none";
+
+      if (!nip || !senha) {
+        msg.innerText = "Preencha todos os campos.";
+        return;
+      }
+
+      loading.style.display = "block";
+
+      // Hash da senha (SHA-256 + Base64)
+      const hash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Base64);
+
+      google.script.run.withSuccessHandler(function(resposta) {
+        loading.style.display = "none";
+        if (resposta.status === "ok" || resposta.sucesso) {
+          sessionStorage.clear();
+          sessionStorage.setItem("nipAdminOnibus", nip);
+          sessionStorage.setItem("nomeAdminOnibus", resposta.nome || "");
+          // Redirecionamento absoluto igual ao sistema exemplo:
+          const destino = "?page=adminOnibus";
+          const a = document.createElement("a");
+          a.href = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec" + destino;
+          a.target = "_top";
+          a.click();
+        } else {
+          msg.innerText = resposta.mensagem || resposta.msg || "NIP ou senha incorretos.";
+        }
+      })
+      .withFailureHandler(function(error) {
+        loading.style.display = "none";
+        msg.innerText = "Erro de comunicação: " + error.message;
+        console.error("Erro ao chamar validarLoginAdminOnibus:", error);
+      })
+      .validarLoginAdminOnibus(nip, hash);
+    }
+
+    // Usabilidade mobile: Enter avança entre campos ou faz login
+    document.getElementById("nip").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("senha").focus();
+      }
+    });
+    document.getElementById("senha").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        entrar();
+      }
+    });
+  </script>
+</body>
+</html>

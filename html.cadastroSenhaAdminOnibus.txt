@@ -1,0 +1,105 @@
+<!-- html.cadastroSenhaAdminOnibus.html -->
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastrar Nova Senha - Admin Ônibus</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
+      <h4 class="mb-3 text-center">Cadastrar Nova Senha - Admin</h4>
+      <form id="formSenha" autocomplete="off" onsubmit="cadastrarSenhaAdmin(); return false;">
+        <div class="form-group">
+          <label for="nip">NIP</label>
+          <input type="text" class="form-control" id="nip" name="nip" readonly>
+        </div>
+        <div class="form-group">
+          <label for="nome">Nome</label>
+          <input type="text" class="form-control" id="nome" name="nome" readonly>
+        </div>
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" class="form-control" id="email" name="email" readonly>
+        </div>
+        <div class="form-group">
+          <label for="senha">Nova Senha</label>
+          <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite a nova senha" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmar">Confirmar Senha</label>
+          <input type="password" class="form-control" id="confirmar" name="confirmar" placeholder="Confirme a senha" required>
+        </div>
+        <button type="submit" class="btn btn-success btn-block">Cadastrar Senha</button>
+      </form>
+      <div id="mensagem" class="text-danger mt-3 text-center"></div>
+      <div id="mensagemOk" class="text-success mt-3 text-center"></div>
+      <div class="text-center mt-3">
+        <a href="?page=loginAdminOnibus" class="small">Voltar ao login</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Carrega dados do sessionStorage (pré-validados)
+    document.addEventListener("DOMContentLoaded", function() {
+      const nip = sessionStorage.getItem("nipCadastroAdmin");
+      const nome = sessionStorage.getItem("nomeCadastroAdmin");
+      const email = sessionStorage.getItem("emailCadastroAdmin");
+      if (!nip || !nome || !email) {
+        window.location.href = "?page=validarCadastroAdminOnibus";
+        return;
+      }
+      document.getElementById("nip").value = nip;
+      document.getElementById("nome").value = nome;
+      document.getElementById("email").value = email;
+    });
+
+    function cadastrarSenhaAdmin() {
+      const nip = document.getElementById("nip").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+      const confirmar = document.getElementById("confirmar").value.trim();
+      const mensagemDiv = document.getElementById("mensagem");
+      const mensagemOkDiv = document.getElementById("mensagemOk");
+      mensagemDiv.innerText = "";
+      mensagemOkDiv.innerText = "";
+
+      if (!senha || !confirmar) {
+        mensagemDiv.innerText = "Preencha os campos de senha.";
+        return;
+      }
+      if (senha.length < 6) {
+        mensagemDiv.innerText = "A senha deve ter no mínimo 6 caracteres.";
+        return;
+      }
+      if (senha !== confirmar) {
+        mensagemDiv.innerText = "As senhas não conferem.";
+        return;
+      }
+      const hash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Base64);
+      google.script.run.withSuccessHandler(function(resposta) {
+        if (resposta && resposta.sucesso) {
+          sessionStorage.removeItem("nipCadastroAdmin");
+          sessionStorage.removeItem("nomeCadastroAdmin");
+          sessionStorage.removeItem("emailCadastroAdmin");
+          mensagemOkDiv.innerText = "Senha cadastrada com sucesso! Você já pode fazer login.";
+          setTimeout(() => { window.location.href = "?page=loginAdminOnibus"; }, 2000);
+        } else {
+          mensagemDiv.innerText = resposta && resposta.mensagem ? resposta.mensagem : "Erro ao cadastrar senha.";
+        }
+      }).withFailureHandler(function() {
+        mensagemDiv.innerText = "Erro ao cadastrar senha.";
+      }).registrarSenhaAdminOnibus(nip, hash);
+    }
+
+    document.getElementById("formSenha").addEventListener("submit", function(e){
+      e.preventDefault();
+      cadastrarSenhaAdmin();
+    });
+  </script>
+</body>
+</html>
