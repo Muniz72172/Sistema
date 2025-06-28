@@ -1,6 +1,3 @@
-<!-- listaAgendamento.html.txt -->
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
