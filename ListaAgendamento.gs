@@ -53,13 +53,11 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
   const colCelular = idx['CELULAR'];
   const colId = idx['ID'] !== undefined ? idx['ID'] : null;
 
-  // Map para auxiliar busca de acompanhantes em reservas
-  const agendamentos = [];
-  const nomesAgendados = [];
+  // Lista final e contadores
   let total = 0, titulares = 0, acompanhantes = 0, reservas = 0;
   let lista = [];
 
-  // Filtrar linhas válidas
+  // Filtrar linhas válidas e classificar titular/acompanhante
   for (let i=1; i<values.length; i++) {
     const linha = values[i];
     if (!linha[colData]) continue;
@@ -76,7 +74,17 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
 
     if (!linha[colStatus] || String(linha[colStatus]).toUpperCase() !== "AGENDADO") continue;
 
-    agendamentos.push({
+    // Corrigir aqui: se o campo acompanhante for igual a "Acompanhante" (case-insensitive), é acompanhante
+    let tipoVaga = "";
+    if ((linha[colAcomp] || "").toString().trim().toLowerCase() === "acompanhante") {
+      tipoVaga = "acompanhante";
+      acompanhantes++;
+    } else {
+      tipoVaga = "titular";
+      titulares++;
+    }
+
+    lista.push({
       idx: i,
       id: colId !== null ? linha[colId] : "",
       data: dataSelecionada,
@@ -87,45 +95,11 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
       acompanhante: linha[colAcomp] || "",
       tipoViagem: linha[colTipoViagem] || "",
       celular: linha[colCelular] || "",
-      status: "Agendado"
+      status: "Agendado",
+      tipoVaga: tipoVaga
     });
-    nomesAgendados.push((linha[colNome] || "").toString().trim());
     total++;
   }
-
-  // Determinação de titulares, acompanhantes e reservas conforme lógica fornecida
-  // Primeiro, um mapa por assento para facilitar busca de reservas
-  const assentoMap = {};
-  agendamentos.forEach(item => {
-    if (!assentoMap[item.assento]) assentoMap[item.assento] = [];
-    assentoMap[item.assento].push(item);
-  });
-
-  // Segundo, um set de nomes de acompanhantes (quem é citado como acompanhante em outro registro)
-  const nomesComoAcompanhante = new Set();
-  agendamentos.forEach(item => {
-    if (item.acompanhante && item.acompanhante.trim() && item.acompanhante.trim() !== "-") {
-      nomesComoAcompanhante.add(item.acompanhante.trim());
-    }
-  });
-
-  // Contagem detalhada por regras fornecidas
-  agendamentos.forEach(item => {
-    // Titulares: quem tem acompanhante nomeado (em qualquer assento, inclusive Rxx)
-    if (item.acompanhante && item.acompanhante.trim() && item.acompanhante.trim() !== "-") {
-      titulares++;
-      // Reservas: só conta a reserva uma vez por titular com ASSENTO Rxx e acompanhante nomeado
-      if (/^R\d+$/i.test(item.assento)) {
-        reservas++;
-      }
-    }
-    // Acompanhantes: quem NÃO tem acompanhante nomeado, mas seu nome aparece como acompanhante de outro, mesmo ASSENTO
-    else if (nomesComoAcompanhante.has(item.nome.trim())) {
-      acompanhantes++;
-    }
-    // (Os demais, se necessário, podem ser ignorados do ponto de vista de métricas principais)
-    lista.push(item);
-  });
 
   // Vagas disponíveis
   const vagasDisponiveis = qtdAssentos - (titulares + acompanhantes);
@@ -190,8 +164,11 @@ function resumoGeralAgendamentos(dataSelecionada) {
   const colAcomp = idx['ACOMPANHANTE'];
 
   // Para lógica conforme especificação
-  const agendamentos = [];
-  const nomesAgendados = [];
+  let totalAgendados = 0;
+  let totalTitulares = 0;
+  let totalAcompanhantes = 0;
+  let totalReservas = 0;
+
   for (let i=1; i<values.length; i++) {
     const row = values[i];
 
@@ -210,48 +187,14 @@ function resumoGeralAgendamentos(dataSelecionada) {
     if (!matchData) continue;
 
     if (String(row[colStatus]).toUpperCase() === "AGENDADO") {
-      agendamentos.push({
-        nome: (row[colNome] || "").toString(),
-        assento: (row[colAssento] || "").toString(),
-        acompanhante: (row[colAcomp] || "").toString()
-      });
-      nomesAgendados.push((row[colNome] || "").toString().trim());
-    }
-  }
-
-  // Auxiliares
-  const nomesComoAcompanhante = new Set();
-  agendamentos.forEach(item => {
-    if (item.acompanhante && item.acompanhante.trim() && item.acompanhante.trim() !== "-") {
-      nomesComoAcompanhante.add(item.acompanhante.trim());
-    }
-  });
-
-  // Contagem
-  let totalAgendados = agendamentos.length;
-  let totalTitulares = 0;
-  let totalAcompanhantes = 0;
-  let totalReservas = 0;
-
-  // Mapa para contar reservas sem duplicidade
-  const reservasUnicas = new Set();
-
-  agendamentos.forEach(item => {
-    // Titulares: quem tem acompanhante nomeado (em qualquer assento, inclusive Rxx)
-    if (item.acompanhante && item.acompanhante.trim() && item.acompanhante.trim() !== "-") {
-      totalTitulares++;
-      // Reservas: só conta a reserva uma vez por titular com ASSENTO Rxx e acompanhante nomeado
-      if (/^R\d+$/i.test(item.assento)) {
-        reservasUnicas.add(item.assento);
+      totalAgendados++;
+      if ((row[colAcomp] || "").toString().trim().toLowerCase() === "acompanhante") {
+        totalAcompanhantes++;
+      } else {
+        totalTitulares++;
       }
     }
-    // Acompanhantes: quem NÃO tem acompanhante nomeado, mas seu nome aparece como acompanhante de outro, mesmo ASSENTO
-    else if (nomesComoAcompanhante.has(item.nome.trim())) {
-      totalAcompanhantes++;
-    }
-    // Os demais são ignorados para métricas principais
-  });
-  totalReservas = reservasUnicas.size;
+  }
 
   // --- Resumo das datas ativas ---
   const configValues = sheetConfig.getDataRange().getValues();
