@@ -1,0 +1,42 @@
+
+🚌 Resumo Técnico – Marcação de Ônibus e Lógica de Assentos
+Ao realizar a marcação de transporte, o sistema da PNSPA aplica regras específicas para organização dos assentos e controle de lotação, considerando titular solo, titular com acompanhante e situações de fila de espera.
+
+🎫 1. Marcação Normal (Com Assento Disponível)
+a) Usuário Solo (sem acompanhante)
+O sistema atribui automaticamente um assento disponível.
+
+Esse número é gravado na coluna ASSENTO da planilha Agendamentos.
+
+Exemplo: ASSENTO = 3.
+
+b) Usuário com Acompanhante
+O sistema reserva dois assentos sequenciais ou próximos, quando disponíveis.
+
+Ambos os assentos são anotados na mesma célula, separados por vírgula.
+
+Exemplo: ASSENTO = 1,2.
+
+O campo ACOMPANHANTE recebe o nome ou referência do acompanhante.
+
+🕓 2. Marcação em Fila de Espera (Ônibus Lotado)
+Quando todos os assentos estão ocupados para determinada data:
+
+a) Usuário Solo na Fila de Espera
+Recebe um código no formato RXX, onde XX é sua posição na fila.
+
+Exemplo: o primeiro da fila será ASSENTO = R1, o segundo R2, e assim por diante.
+
+O campo STATUS é definido como "Reserva".
+
+b) Usuário com Acompanhante na Fila de Espera
+Tanto o titular quanto o acompanhante recebem o mesmo código de reserva.
+
+Exemplo: se forem o segundo grupo da fila, ambos recebem R2.
+
+📒 Exemplos Práticos
+Tipo	Assento	Acompanhante	Status
+Solo com vaga	5	-	Agendado
+Com acompanhante	12,13	João da Silva	Agendado
+Solo na fila espera	R3	-	Reserva
+Com acompanhante fila	R4	Maria Costa	Reserva
