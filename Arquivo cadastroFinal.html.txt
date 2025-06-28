@@ -1,0 +1,377 @@
+<!--cadastroFinal.html-->
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cadastro - Sistema PNSPA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+body { background-color: #f5f5f5; }
+.container { max-width: 500px; margin-top: 40px; }
+.card { padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.heraldica { width: 90px; margin-bottom: 15px; }
+#msg { margin-top: 15px; color: red; text-align: center; font-weight: bold; }
+#loading { display: none; margin-top: 15px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<img src="https://i.ibb.co/bjwyWppw/Heraldica-PNSPA.png" class="heraldica mx-auto d-block" alt="Heráldica PNSPA">
+<h5 class="text-center">Cadastro de Novo Usuário</h5>
+<form id="formCadastroFinal">
+<div class="form-group">
+<label for="nip">NIP</label>
+<input type="text" id="nip" class="form-control" disabled>
+</div>
+<div class="form-group">
+<label for="nome">Nome completo</label>
+<input type="text" id="nome" class="form-control" readonly>
+</div>
+<div class="form-group">
+<label for="nascimento">Data de nascimento</label>
+<input type="date" id="nascimento" class="form-control" readonly>
+</div>
+<div class="form-group">
+<label for="cidade">Cidade</label>
+<select id="cidade" class="form-control">
+<option value="">Selecione</option>
+<option>Araruama</option>
+<option>Armação dos Búzios</option>
+<option>Arraial do Cabo</option>
+<option>Bom Jesus do Itabapoana</option>
+<option>Cabo Frio</option>
+<option>Cambuci</option>
+<option>Campos dos Goytacazes</option>
+<option>Carapebus</option>
+<option>Cardoso Moreira</option>
+<option>Casimiro de Abreu</option>
+<option>Conceição de Macabu</option>
+<option>Iguaba Grande</option>
+<option>Italva</option>
+<option>Itaperuna</option>
+<option>Laje do Muriaé</option>
+<option>Macaé</option>
+<option>Miracema</option>
+<option>Natividade</option>
+<option>Porciúncula</option>
+<option>Quissamã</option>
+<option>Rio Bonito</option>
+<option>Rio das Ostras</option>
+<option>Santo Antônio de Pádua</option>
+<option>São Fidélis</option>
+<option>São Francisco de Itabapoana</option>
+<option>São João da Barra</option>
+<option>São Pedro da Aldeia</option>
+<option>Saquarema</option>
+<option>Silva Jardim</option>
+<option>Varre-Sai</option>
+</select>
+</div>
+<div class="form-group">
+<label for="email">E-mail</label>
+<input type="email" id="email" class="form-control">
+</div>
+<div class="form-group">
+<label for="celular">Celular</label>
+<input type="text" id="celular" class="form-control" placeholder="DDD + número">
+</div>
+<div class="form-group">
+<label for="vinculo">Vínculo</label>
+<select id="vinculo" class="form-control">
+<option value="">Selecione</option>
+<option>Militar da Ativa</option>
+<option>Veterano (militar da reserva)</option>
+<option>Dependente</option>
+<option>Pensionista</option>
+<option>Servidor Civil</option>
+</select>
+</div>
+<div class="form-group">
+<label for="senha">Criar senha</label>
+<input type="password" id="senha" class="form-control">
+</div>
+<div class="form-group">
+<label for="confirmarSenha">Confirmar senha</label>
+<input type="password" id="confirmarSenha" class="form-control">
+</div>
+
+<!-- INÍCIO LGPD -->
+<div class="form-group form-check">
+  <input type="checkbox" class="form-check-input" id="lgpdConsentimento" required>
+  <label class="form-check-label" for="lgpdConsentimento">
+    Li e concordo com a
+    <a href="#" data-toggle="modal" data-target="#modalLgpd">Política de Privacidade e Proteção de Dados Pessoais</a>
+  </label>
+</div>
+<!-- FIM LGPD -->
+
+<button class="btn btn-success btn-block" type="submit" id="btnFinalizar">Finalizar Cadastro</button>
+<div id="msg"></div>
+<div id="loading" style="display: none; margin-top: 15px;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="sr-only">Cadastrando...</span>
+  </div>
+  <p>Cadastrando...</p>
+</div>
+</form>
+</div>
+</div>
+
+<!-- INÍCIO MODAL LGPD -->
+<div class="modal fade" id="modalLgpd" tabindex="-1" aria-labelledby="modalLgpdLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLgpdLabel">Política de Privacidade e Proteção de Dados Pessoais – PNSPA</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="white-space: pre-wrap; font-size: 0.95em; max-height: 60vh;">
+POLÍTICA DE PRIVACIDADE E PROTEÇÃO DE DADOS PESSOAIS – POLICLÍNICA NAVAL DE SÃO PEDRO DA ALDEIA (PNSPA)
+Versão 1.0 – 16 jun 2025
+
+1. Quem somos
+A Policlínica Naval de São Pedro da Aldeia (PNSPA) é Organização Militar de Saúde da Marinha do Brasil (OMH) vinculada ao Comando da Força Aeronaval, responsável por prestar assistência médico-hospitalar e serviços correlatos a militares, dependentes e pensionistas do Sistema de Saúde da Marinha (SSM).
+
+2. Dados pessoais que coletamos
+No cadastro e durante o uso do Sistema Web da PNSPA são coletados:
+
+Identificação militar (NIP), nome completo, e-mail institucional ou civil, telefone celular, cidade/UF e vínculo com a Marinha.
+
+Credenciais de acesso (senha armazenada como hash SHA-256 + Base64).
+
+Registros de uso: datas de login/logout, marcações de serviços (ônibus, consultas, exames) e logs de operações.
+
+Endereço IP, data, hora e user-agent em cada operação sensível, para auditoria e segurança do paciente.
+
+3. Finalidades do tratamento
+Identificar e autenticar usuários habilitados, inclusive validação de NIP contra a base FUSMAOFF.
+
+Permitir marcações de serviços, geração de históricos e relatórios operacionais.
+
+Gerir avisos e comunicações internas (campanhas de saúde, orientações e notificações).
+
+Garantir rastreabilidade de acessos e atendimentos, conforme exigências regulatórias da Marinha e boa prática de saúde.
+
+Atender obrigações legais e de políticas públicas de saúde (Lei nº 13 709/2018 – LGPD, Estatuto do Militar e normas do SSM).
+
+4. Bases legais previstas na LGPD
+Art. 7º, I – cumprimento de obrigação legal ou regulatória.
+
+Art. 7º, II – execução de políticas públicas de saúde e defesa nacional.
+
+Art. 7º, V – execução de contrato/termo de uso celebrado com o titular.
+
+Art. 7º, IX – legítimo interesse, resguardados direitos e liberdades do titular.
+
+Consentimento livre e inequívoco, formalizado pelo ✅ checkbox “Li e concordo” antes do envio do cadastro e de cada marcação sensível.
+
+5. Compartilhamento de dados
+Os dados podem ser compartilhados exclusivamente com:
+
+Órgãos superiores da Marinha (Comando da Força Aeronaval, Diretoria de Saúde da Marinha) para execução de suas competências legais.
+
+Órgãos públicos de controle (CGU, TCU) ou judiciais, mediante requisição legal.
+
+Prestadores de serviços de saúde conveniados, estritamente quando necessário ao atendimento.
+
+A PNSPA não vende nem repassa dados pessoais a entidades privadas sem respaldo legal.
+
+6. Segurança da informação
+Senhas encriptadas (SHA-256 + Base64) e transmitidas por conexão TLS.
+
+Controle de sessão via sessionStorage esvaziado no logout.
+
+Camadas de permissão por perfil de usuário e registros imutáveis de auditoria.
+
+Backup em datacenters Google Cloud sob as normas de segurança da Marinha.
+
+Monitoramento de incidentes pelo Serviço de Tecnologia da Informação da PNSPA.
+
+7. Retenção e descarte
+Dados cadastrais e históricos permanecem enquanto o titular mantiver vínculo ativo com o SSM.
+
+Registros de auditoria são guardados por 5 anos, salvo obrigação superior.
+
+Passado o prazo, os dados são anonimizados ou eliminados de forma segura, conforme Art. 16 da LGPD.
+
+8. Direitos do titular
+Você pode solicitar, a qualquer momento:
+
+Confirmação da existência de tratamento.
+
+Acesso aos seus dados.
+
+Correção de dados incompletos, inexatos ou desatualizados.
+
+Anonimização, bloqueio ou eliminação de dados desnecessários.
+
+Portabilidade, nos termos da autoridade nacional.
+
+Informação sobre compartilhamentos.
+
+Revogação do consentimento (quando aplicável).
+
+9. Como exercer seus direitos
+Encaminhe sua solicitação:
+
+Ouvidoria PNSPA – e-mail: pnspa.ouvidoria@marinha.mil.br
+
+Telefone: (22) 2621-4065
+
+Plataforma Fala.BR (manifestação “Saúde – Outros”) – requer selo de confiabilidade Prata ou Ouro
+
+Será necessário provar identidade (documento militar ou declaração de dependente válida).
+
+10. Cookies e tecnologias equivalentes
+O Sistema Web utiliza apenas cookies de sessão estritamente necessários para manter o usuário autenticado. Não são empregados cookies de rastreamento nem publicidade.
+
+11. Alterações desta política
+Esta política poderá ser atualizada para refletir mudanças legais ou tecnológicas. Quando for o caso, exibiremos aviso na tela de login e solicitaremos um novo aceite se necessário.
+
+12. Dúvidas
+Entre em contato com a Ouvidoria ou visite a página institucional da PNSPA (https://www.marinha.mil.br/comforaernav/pnspa) para informações adicionais.
+
+Ao marcar a caixa de consentimento no formulário, você declara ter lido, compreendido e aceitado os termos desta Política de Privacidade e Proteção de Dados Pessoais.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- FIM MODAL LGPD -->
+
+<script>
+// Função para obter parâmetros da URL
+function getParameterByName(name) {
+  const url = window.location.href;
+  const nameRegex = name.replace(/[\[\]]/g, "\\$&");
+  const regex = new RegExp("[?&]" + nameRegex + "(=([^&#]*)|&|#|$)");
+  const results = regex.exec(url);
+  if (!results || !results[2]) return null;
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+// Função para redirecionar
+function redirecionarPara(pageName) {
+  const baseUrl = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec";
+  window.top.location.href = `${baseUrl}?page=${pageName}`;
+}
+
+// Executa quando a página carrega
+
+document.addEventListener("DOMContentLoaded", function () {
+  const msgDiv = document.getElementById("msg");
+
+  // Recupera dados do sessionStorage
+  const nip = sessionStorage.getItem("nip");
+  const nome = sessionStorage.getItem("nome");
+  const nascimento = sessionStorage.getItem("nascimento");
+  const cidade = sessionStorage.getItem("cidade"); // Pode estar vazio ou nulo
+
+  if (!nip || !nome || !nascimento) {
+    msgDiv.innerText = "Erro: dados de validação não encontrados. Retornando ao login.";
+    setTimeout(() => {
+      window.top.location.href = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=login";
+    }, 3000);
+    return;
+  }
+
+  document.getElementById("nip").value = nip;
+  document.getElementById("nome").value = nome;
+  document.getElementById("nascimento").value = nascimento;
+
+  // Preenche e bloqueia cidade, se existir
+  const cidadeSelect = document.getElementById("cidade");
+  if (cidade) {
+    for (let i = 0; i < cidadeSelect.options.length; i++) {
+      if (cidadeSelect.options[i].text.trim().toLowerCase() === cidade.trim().toLowerCase()) {
+        cidadeSelect.selectedIndex = i;
+        break;
+      }
+    }
+  }
+});
+
+
+// Evento de submit do formulário (mantido como estava, com validações)
+document.getElementById("formCadastroFinal").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const msgDiv = document.getElementById("msg");
+  const loadingDiv = document.getElementById("loading");
+  const btnFinalizar = document.getElementById("btnFinalizar");
+  msgDiv.innerText = "";
+
+  const nip = document.getElementById("nip").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const nascimento = document.getElementById("nascimento").value;
+  const cidade = document.getElementById("cidade").value;
+  const email = document.getElementById("email").value.trim();
+  const celular = document.getElementById("celular").value.trim();
+  const vinculo = document.getElementById("vinculo").value;
+  const senha = document.getElementById("senha").value.trim();
+  const confirmarSenha = document.getElementById("confirmarSenha").value.trim();
+
+  // Validações básicas
+  if (!nome || !nascimento || !cidade || !email || !celular || !vinculo || !senha || !confirmarSenha) {
+    msgDiv.innerText = "Preencha todos os campos obrigatórios.";
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      msgDiv.innerText = "Formato de e-mail inválido.";
+      return;
+  }
+  const celularLimpo = celular.replace(/\D/g, "");
+  if (!/^\d{10,11}$/.test(celularLimpo)) {
+      msgDiv.innerText = "Formato de celular inválido. Use apenas números com DDD (ex: 21988887777).";
+      return;
+  }
+  if (senha !== confirmarSenha) {
+    msgDiv.innerText = "As senhas não conferem.";
+    return;
+  }
+
+  // Validação LGPD
+  const consentCheckbox = document.getElementById("lgpdConsentimento");
+  if (!consentCheckbox.checked) {
+    msgDiv.innerText = "Você deve concordar com a Política de Privacidade para finalizar o cadastro.";
+    return;
+  }
+
+  loadingDiv.style.display = "block";
+  btnFinalizar.disabled = true;
+
+  google.script.run
+    .withSuccessHandler(res => {
+      loadingDiv.style.display = "none";
+      btnFinalizar.disabled = false;
+      if (res && res.status === "ok") {
+  msgDiv.innerText = "Cadastro realizado com sucesso! Redirecionando...";
+  setTimeout(() => {
+  window.location.href = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=login";
+}, 2000); // Aguarda 2s antes de redirecionar
+      } else {
+        msgDiv.innerText = res?.msg || "Erro desconhecido ao finalizar cadastro.";
+      }
+    })
+    .withFailureHandler(error => {
+      loadingDiv.style.display = "none";
+      btnFinalizar.disabled = false;
+      msgDiv.innerText = "Erro de comunicação com o servidor: " + error.message;
+      console.error("Erro Apps Script (cadastrarUsuario):", error);
+    })
+    .cadastrarUsuario(nip, nome, nascimento, cidade, email, celular, vinculo, senha); // Função do CadastroValidado_corrigido.gs
+});
+</script>
+<!-- Scripts Bootstrap para modal funcionar -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

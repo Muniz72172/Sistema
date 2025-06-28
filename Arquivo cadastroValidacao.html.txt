@@ -1,0 +1,282 @@
+<!--cadastroValidacao.html-->
+
+
+
+<!-- Arquivo: cadastroValidacao.html (Campo de data de nascimento com seleção separada para dia, mês e ano)
+     Otimizado para uso em celular / responsivo / acessível -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<title>Validação de Cadastro - Sistema PNSPA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+  html, body { height: 100%; }
+  body { 
+    background-color: #f5f5f5; 
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+  }
+  .container { 
+    max-width: 100vw; 
+    min-height: 100vh;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+  }
+  .card { 
+    padding: 22px 10px 18px 10px; 
+    border-radius: 15px; 
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    text-align: center; 
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: #fff;
+  }
+  .heraldica { width: 80px; margin-bottom: 12px; }
+  h5 { font-size: 1.09rem; }
+  label { font-size: 1rem; }
+  .form-group { margin-bottom: 17px; }
+  .form-control, select, button, input {
+    font-size: 1.07rem;
+    border-radius: 8px;
+    min-height: 42px;
+    box-shadow: none;
+  }
+  .form-control:focus, select:focus {
+    box-shadow: 0 0 0 2px #bce8ff;
+    border-color: #65bdfa;
+  }
+  .form-row {
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+  .form-row > .col {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  button.btn-block {
+    padding: 12px 0;
+    font-size: 1.08rem;
+    border-radius: 8px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  #msg { margin-top: 10px; color: #d32f2f; min-height: 22px; }
+  #loading { display: none; margin-top: 15px; }
+  a.d-block {
+    font-size: 0.97rem;
+    margin-bottom: 2px;
+    color: #007bff;
+    word-break: break-all;
+  }
+  small.form-text { font-size: 0.95rem; }
+  @media (max-width: 500px) {
+    .container, .card { max-width: 99vw; }
+    .card { padding: 13px 2px 10px 2px; }
+    .heraldica { width: 55px; }
+    h5 { font-size: 1rem; }
+    .form-control, select { font-size: 1rem; min-height: 38px; }
+    button.btn-block { font-size: 1rem; }
+  }
+  @media (max-width: 340px) {
+    .heraldica { width: 42px; }
+    .card { padding: 4px 0 2px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <img src="https://i.ibb.co/bjwyWppw/Heraldica-PNSPA.png" class="heraldica mx-auto d-block" alt="Heráldica PNSPA">
+    <h5>Verificação de Cadastro</h5>
+    <form autocomplete="on" onsubmit="event.preventDefault(); validar();">
+      <div class="form-group text-left">
+        <label for="nip">NIP</label>
+        <input type="text" id="nip" class="form-control"
+          inputmode="numeric" maxlength="15" autocomplete="username"
+          placeholder="Digite o NIP" aria-label="NIP" autocapitalize="off" autocorrect="off" required>
+      </div>
+      <div class="form-group text-left">
+        <label>Data de Nascimento</label>
+        <div class="form-row">
+          <div class="col">
+            <select id="dia" class="form-control" required aria-label="Dia de nascimento">
+              <option value="">Dia</option>
+            </select>
+          </div>
+          <div class="col">
+            <select id="mes" class="form-control" required aria-label="Mês de nascimento">
+              <option value="">Mês</option>
+            </select>
+          </div>
+          <div class="col">
+            <select id="ano" class="form-control" required aria-label="Ano de nascimento">
+              <option value="">Ano</option>
+            </select>
+          </div>
+        </div>
+        <small class="form-text text-muted">Selecione o dia, mês e ano</small>
+      </div>
+      <button type="submit" class="btn btn-success btn-block" id="btnValidar">Continuar</button>
+    </form>
+    <a
+      href="https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=login"
+      class="d-block mt-2">Voltar para login</a>
+    <div id="msg"></div>
+    <div id="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Verificando...</span>
+      </div>
+      <p style="font-size:0.98rem;">Verificando o registro. Por favor, aguarde... Isso pode levar cerca de 1 a 2 minutos.</p>
+    </div>
+  </div>
+</div>
+<script>
+// Populando os selects de dia, mês e ano
+(function popularCamposData(){
+  // Dia
+  const diaSelect = document.getElementById("dia");
+  for(let d=1; d<=31; d++){
+    let opt = document.createElement("option");
+    opt.value = d.toString().padStart(2, "0");
+    opt.text = d.toString().padStart(2, "0");
+    diaSelect.appendChild(opt);
+  }
+  // Mês
+  const meses = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+  const mesSelect = document.getElementById("mes");
+  for(let m=1; m<=12; m++){
+    let opt = document.createElement("option");
+    opt.value = m.toString().padStart(2, "0");
+    opt.text = meses[m-1];
+    mesSelect.appendChild(opt);
+  }
+  // Ano
+  const anoSelect = document.getElementById("ano");
+  const anoAtual = new Date().getFullYear();
+  for(let a=anoAtual; a>=1940; a--){
+    let opt = document.createElement("option");
+    opt.value = a;
+    opt.text = a;
+    anoSelect.appendChild(opt);
+  }
+})();
+
+function validar() {
+  const nip = document.getElementById("nip").value.trim();
+  const dia = document.getElementById("dia").value;
+  const mes = document.getElementById("mes").value;
+  const ano = document.getElementById("ano").value;
+  const msg = document.getElementById("msg");
+  const loading = document.getElementById("loading");
+  const btnValidar = document.getElementById("btnValidar");
+
+  msg.innerText = "";
+
+  // Verifica se todos os campos da data foram preenchidos
+  if (!nip || !dia || !mes || !ano) {
+    msg.innerText = "Preencha todos os campos.";
+    return;
+  }
+
+  // Monta a data no formato yyyy-mm-dd
+  const nascimento = `${ano}-${mes}-${dia}`;
+  
+  // Validação adicional: não permitir datas futuras
+  const dataNasc = new Date(`${ano}-${mes}-${dia}`);
+  const hoje = new Date();
+  if(dataNasc > hoje){
+    msg.innerText = "Data de nascimento não pode ser no futuro.";
+    return;
+  }
+
+  loading.style.display = "block";
+  btnValidar.disabled = true;
+
+  google.script.run
+  .withSuccessHandler(function(resposta) {
+    if (resposta && resposta.status === "ok") {
+      sessionStorage.setItem("nip", nip);
+      sessionStorage.setItem("nome", resposta.nome);
+      sessionStorage.setItem("nascimento", nascimento);
+      sessionStorage.setItem("cidade", resposta.cidade || "");
+
+      google.script.run
+        .withSuccessHandler(function(existe) {
+          loading.style.display = "none";
+          btnValidar.disabled = false;
+          if (existe) {
+            msg.innerText = "Este NIP já possui cadastro no sistema.";
+          } else {
+            window.top.location.href = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=cadastroFinal";
+          }
+        })
+        .withFailureHandler(function(error) {
+          loading.style.display = "none";
+          btnValidar.disabled = false;
+          msg.innerText = "Erro ao verificar cadastro existente: " + error.message;
+          console.error("Erro verificarCadastroExistente:", error);
+        })
+        .verificarCadastroExistente(nip);
+    } else {
+      loading.style.display = "none";
+      btnValidar.disabled = false;
+      msg.innerText = resposta && resposta.msg ? resposta.msg : "Erro na validação. Verifique os dados.";
+    }
+  })
+  .withFailureHandler(function(error) {
+    loading.style.display = "none";
+    btnValidar.disabled = false;
+    msg.innerText = "Erro de comunicação com o servidor: " + error.message;
+    console.error("Erro verificarFusma:", error);
+  })
+  .verificarFusma(nip, nascimento);
+
+}
+
+// Usabilidade mobile: Enter avança entre campos ou valida
+document.getElementById("nip").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("dia").focus();
+  }
+});
+document.getElementById("dia").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("mes").focus();
+  }
+});
+document.getElementById("mes").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("ano").focus();
+  }
+});
+document.getElementById("ano").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    validar();
+  }
+});
+
+// Foco automático no NIP ao carregar
+window.onload = function() {
+  document.getElementById('nip').focus();
+};
+</script>
+</body>
+</html>
