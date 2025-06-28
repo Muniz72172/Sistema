@@ -1,0 +1,249 @@
+// Arquivo: CadastroValidado.gs
+// Contém as funções corrigidas para validação e preparação do cadastro.
+
+/**
+ * Verifica se o NIP e a data de nascimento estão autorizados na aba ValidacaoFusma
+ * CORRIGIDO: Comparação de datas mais robusta e tratamento de erros.
+ */
+function verificarFusma(nip, nascimento) {
+  try {
+    const fusmaSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ValidacaoFusma");
+    if (!fusmaSheet) {
+      return { status: "erro", msg: "Configuração de validação não encontrada." };
+    }
+
+    const ultimaLinha = fusmaSheet.getLastRow();
+    const dados = fusmaSheet.getRange(2, 1, ultimaLinha - 1, 3).getValues(); // A partir da linha 2, colunas A-C
+
+    const nipLimpo = String(nip).replace(/^\'/, '').trim();
+    const nascimentoInput = String(nascimento).trim(); // Ex: 2000-01-01
+
+    for (let i = 0; i < dados.length; i++) {
+      const nipFusma = String(dados[i][0] || "").replace(/^\'/, '').trim();
+      const nome = dados[i][1];
+      const dataNascPlanilha = dados[i][2];
+
+      if (nipFusma === nipLimpo) {
+        let nascimentoFormatado = "";
+
+        if (dataNascPlanilha instanceof Date) {
+          nascimentoFormatado = dataNascPlanilha.toISOString().slice(0, 10);
+        } else {
+          const dateObj = new Date(dataNascPlanilha);
+          if (dateObj && !isNaN(dateObj.getTime())) {
+            nascimentoFormatado = dateObj.toISOString().slice(0, 10);
+          } else {
+            continue; // Pula se a data estiver errada
+          }
+        }
+
+        if (nascimentoFormatado === nascimentoInput) {
+          return { status: "ok", nome: nome };
+        }
+      }
+    }
+
+    return { status: "erro", msg: "NIP ou data de nascimento não conferem com a base. Verifique os dados." };
+
+  } catch (e) {
+    return { status: "erro", msg: "Erro interno durante a validação." };
+  }
+}
+
+// Verifica se o NIP já está cadastrado na aba UsuariosCadastrados.
+// Retorna true se encontrar, false caso contrário.
+function verificarCadastroExistente(nip) {
+  const aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UsuariosCadastrados");
+  const ultimaLinha = aba.getLastRow();
+  const nips = aba.getRange(2, 1, ultimaLinha - 1, 1).getValues(); // Coluna A, da linha 2 até a última
+
+  const nipLimpo = String(nip).replace(/^'/, '').trim();
+
+  for (let i = 0; i < nips.length; i++) {
+    const nipAtual = String(nips[i][0] || "").replace(/^'/, '').trim();
+    if (nipAtual === nipLimpo) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+/**
+ * Preenche automaticamente os dados do NIP validado
+ * CORRIGIDO: Tratamento de erro adicionado.
+ */
+
+
+/**
+ * Retorna os dados do NIP validado para pré-preenchimento do formulário final
+ */
+function prepararDadosCadastro(nip) {
+  try {
+    const fusmaSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ValidacaoFusma");
+    if (!fusmaSheet) {
+      return null;
+    }
+
+    const ultimaLinha = fusmaSheet.getLastRow();
+    const dados = fusmaSheet.getRange(2, 1, ultimaLinha - 1, 4).getValues(); // A-D: NIP, Nome, Data, Cidade
+    const nipLimpo = String(nip).replace(/^\'/, '').trim();
+
+    for (let i = 0; i < dados.length; i++) {
+      const nipPlanilha = String(dados[i][0] || "").replace(/^\'/, '').trim();
+      if (nipPlanilha === nipLimpo) {
+        const nome = dados[i][1] || "";
+        const data = dados[i][2];
+        const cidade = dados[i][3] || "";
+        let nascimento = "";
+
+        if (data instanceof Date) {
+          nascimento = data.toISOString().slice(0, 10);
+        } else {
+          const obj = new Date(data);
+          if (obj && !isNaN(obj.getTime())) {
+            nascimento = obj.toISOString().slice(0, 10);
+          }
+        }
+
+        return { nome, nascimento, cidade };
+      }
+    }
+
+    return null; // Não encontrou
+  } catch (e) {
+    console.error("Erro prepararDadosCadastro:", e);
+    return null;
+  }
+}
+
+
+
+/**
+ * Grava os dados finais do novo usuário na aba UsuariosCadastrados
+ * CORRIGIDO: Tratamento de erro e verificação de existência.
+ */
+function cadastrarUsuario(nip, nome, nascimento, cidade, email, celular, vinculo, senha) {
+  try {
+    const aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UsuariosCadastrados");
+    if (!aba) return { status: "erro", msg: "Erro interno: aba de cadastro não encontrada." };
+
+    const nipLimpo = String(nip).replace(/^\'/, '').trim();
+    const nipTexto = `'${nipLimpo}`;
+
+    // Verifica se NIP já está cadastrado lendo só coluna A
+    const ultimaLinha = aba.getLastRow();
+    const nips = aba.getRange(2, 1, ultimaLinha - 1, 1).getValues();
+
+    for (let i = 0; i < nips.length; i++) {
+      const nipPlanilha = String(nips[i][0] || "").replace(/^\'/, '').trim();
+      if (nipPlanilha === nipLimpo) {
+        return { status: "erro", msg: "Este NIP já possui cadastro no sistema." };
+      }
+    }
+
+    const senhaHash = hashSenha(senha);
+    const dataCadastro = new Date(); // Formato padrão (evita Utilities)
+
+    aba.appendRow([
+      nipTexto,
+      nome,
+      nascimento,
+      cidade,
+      email,
+      celular,
+      vinculo,
+      senhaHash,
+      "Ativo",
+      dataCadastro
+    ]);
+
+    return { status: "ok" };
+  } catch (erro) {
+    return { status: "erro", msg: "Erro interno ao finalizar o cadastro." };
+  }
+}
+
+
+// ------------- Funções de Teste (Opcional) -------------
+
+function testarVerificarFusma() {
+  // Teste com dados que existem na sua planilha ValidacaoFusma
+  const nipTeste = "05018293"; 
+  const dataTeste = "1985-02-07"; // Data correspondente ao NIP
+  const resultado = verificarFusma(nipTeste, dataTeste);
+  Logger.log("Resultado da verificação FUSMA: " + JSON.stringify(resultado));
+  
+  // Teste com dados que NÃO existem ou data errada
+  const resultadoErro = verificarFusma("05018293", "2000-01-01");
+  Logger.log("Resultado da verificação FUSMA (Erro esperado): " + JSON.stringify(resultadoErro));
+}
+
+function testarPrepararDadosCadastro() {
+  const nipTeste = "05018293"; // Use um NIP válido da ValidacaoFusma
+  const resultado = prepararDadosCadastro(nipTeste);
+  Logger.log("Resultado prepararDadosCadastro: " + JSON.stringify(resultado));
+}
+
+// 🔍 Teste rápido para verificar se um NIP está na aba ValidacaoFusma e retorna os dados
+function testarBuscaFusmaPorNip(nip) {
+  try {
+    const idFusma = "1x2yy3xErVsgelY9S6yvvU8Zjm66luCbqxmObLsuCltY"; // ID da planilha FUSMAOFF
+    const fusmaSheet = SpreadsheetApp.openById(idFusma).getSheetByName("ValidacaoFusma");
+    if (!fusmaSheet) {
+      Logger.log("Aba 'ValidacaoFusma' não encontrada.");
+      return;
+    }
+
+    const dados = fusmaSheet.getDataRange().getValues();
+    const nipLimpo = String(nip).replace(/^'+/, '').trim();
+
+    for (let i = 1; i < dados.length; i++) {
+      const nipFusma = String(dados[i][0] || "").replace(/^'+/, '').trim();
+      const nome = dados[i][1] || "";
+      const dataNasc = dados[i][2];
+      const cidade = dados[i][3] || "";
+
+      if (nipFusma === nipLimpo) {
+        const nascimentoFormatado = dataNasc instanceof Date
+          ? Utilities.formatDate(dataNasc, Session.getScriptTimeZone(), "yyyy-MM-dd")
+          : String(dataNasc);
+          
+        Logger.log(`✅ NIP encontrado: ${nipFusma}`);
+        Logger.log(`Nome: ${nome}`);
+        Logger.log(`Nascimento: ${nascimentoFormatado}`);
+        Logger.log(`Cidade: ${cidade}`);
+        return;
+      }
+    }
+
+    Logger.log("❌ NIP não encontrado na planilha FUSMAOFF.");
+  } catch (e) {
+    Logger.log("Erro ao buscar NIP na FUSMAOFF: " + e);
+  }
+}
+
+// 👉 Função auxiliar para executar o teste com NIP específico
+function executarTesteFusma() {
+  testarBuscaFusmaPorNip("05018293");
+}
+
+function testarFuncao() {
+  Logger.log(prepararDadosCadastro('13171780'));
+}
+
+function testarCadastrarUsuario() {
+  // CUIDADO: Este teste realmente cadastra um usuário. Use dados fictícios.
+  const nipTeste = "111111" + Math.floor(Math.random() * 1000); // NIP único
+  const nomeTeste = "Usuário Teste";
+  const nascTeste = "1999-12-31";
+  const cidadeTeste = "Rio de Janeiro";
+  const emailTeste = "teste@teste.com";
+  const celTeste = "21987654321";
+  const vincTeste = "Militar da Ativa";
+  const senhaTeste = "senha123";
+  
+  const resultado = cadastrarUsuario(nipTeste, nomeTeste, nascTeste, cidadeTeste, emailTeste, celTeste, vincTeste, senhaTeste);
+  Logger.log("Resultado cadastrarUsuario: " + JSON.stringify(resultado));
+  // Lembre-se de apagar o usuário de teste da planilha UsuariosCadastrados depois.
+}
