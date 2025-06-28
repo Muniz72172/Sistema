@@ -55,9 +55,12 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
 
   // Lista final e contadores
   let total = 0, titulares = 0, acompanhantes = 0, reservas = 0;
+  let assentosReservadosOcupados = 0;
+  const assentosReservados = [43,44,45,46];
+  const assentosTravados = [7,8];
   let lista = [];
 
-  // Filtrar linhas válidas e classificar titular/acompanhante
+  // Filtrar linhas válidas e classificar titular/acompanhante/reserva
   for (let i=1; i<values.length; i++) {
     const linha = values[i];
     if (!linha[colData]) continue;
@@ -72,9 +75,19 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
     }
     if (String(dataPlanilha) !== dataSelecionada) continue;
 
-    if (!linha[colStatus] || String(linha[colStatus]).toUpperCase() !== "AGENDADO") continue;
+    if (!linha[colStatus]) continue;
+    const statusStr = String(linha[colStatus]).toUpperCase();
+    if (statusStr !== "AGENDADO" && statusStr !== "RESERVA") continue;
 
-    // Corrigir aqui: se o campo acompanhante for igual a "Acompanhante" (case-insensitive), é acompanhante
+    // Ignorar assentos travados (7 e 8)
+    let assentoNum = parseInt(linha[colAssento]);
+    if (!isNaN(assentoNum) && assentosTravados.includes(assentoNum)) continue;
+
+    // Contar assentos reservados ocupados (43,44,45,46)
+    if (!isNaN(assentoNum) && assentosReservados.includes(assentoNum)) {
+      assentosReservadosOcupados++;
+    }
+
     let tipoVaga = "";
     if ((linha[colAcomp] || "").toString().trim().toLowerCase() === "acompanhante") {
       tipoVaga = "acompanhante";
@@ -83,6 +96,7 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
       tipoVaga = "titular";
       titulares++;
     }
+    if (statusStr === "RESERVA") reservas++;
 
     lista.push({
       idx: i,
@@ -95,22 +109,24 @@ function carregarPainelAgendamentoPorData(dataSelecionada) {
       acompanhante: linha[colAcomp] || "",
       tipoViagem: linha[colTipoViagem] || "",
       celular: linha[colCelular] || "",
-      status: "Agendado",
+      status: statusStr === "RESERVA" ? "Reserva" : "Agendado",
       tipoVaga: tipoVaga
     });
     total++;
   }
 
-  // Vagas disponíveis
-  const vagasDisponiveis = qtdAssentos - (titulares + acompanhantes);
+  // Vagas disponíveis (desconsiderando assentos travados e reservados!)
+  const totalAssentosDisponiveis = qtdAssentos - assentosTravados.length - assentosReservados.length;
+  const vagasDisponiveis = totalAssentosDisponiveis - (titulares + acompanhantes);
 
-  // Resumo
+  // Resumo - adicionando assentosReservadosOcupados
   const resumo = {
-    total: total, // agendamentos ativos
+    total: total, // agendamentos ativos + reservas
     titulares: titulares,
     acompanhantes: acompanhantes,
     reservas: reservas,
-    vagasDisponiveis: vagasDisponiveis
+    vagasDisponiveis: vagasDisponiveis,
+    assentosReservadosOcupados: assentosReservadosOcupados
   };
 
   return {resumo: resumo, lista: lista};
@@ -169,6 +185,8 @@ function resumoGeralAgendamentos(dataSelecionada) {
   let totalAcompanhantes = 0;
   let totalReservas = 0;
 
+  // Não calcula assentos reservados nem travados no resumo geral (só painel da data)
+
   for (let i=1; i<values.length; i++) {
     const row = values[i];
 
@@ -186,12 +204,18 @@ function resumoGeralAgendamentos(dataSelecionada) {
     }
     if (!matchData) continue;
 
-    if (String(row[colStatus]).toUpperCase() === "AGENDADO") {
-      totalAgendados++;
+    if (!row[colStatus]) continue;
+    const statusStr = String(row[colStatus]).toUpperCase();
+    if (statusStr === "AGENDADO" || statusStr === "RESERVA") {
       if ((row[colAcomp] || "").toString().trim().toLowerCase() === "acompanhante") {
         totalAcompanhantes++;
       } else {
         totalTitulares++;
+      }
+      if (statusStr === "AGENDADO") {
+        totalAgendados++;
+      } else if (statusStr === "RESERVA") {
+        totalReservas++;
       }
     }
   }
