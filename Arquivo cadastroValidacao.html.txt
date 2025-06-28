@@ -1,10 +1,5 @@
 <!--cadastroValidacao.html-->
 
-
-
-<!-- Arquivo: cadastroValidacao.html (Campo de data de nascimento com seleção separada para dia, mês e ano)
-     Otimizado para uso em celular / responsivo / acessível -->
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -80,6 +75,7 @@ href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     word-break: break-all;
   }
   small.form-text { font-size: 0.95rem; }
+  .alert { margin-top: 10px; font-size: 0.9rem; }
   @media (max-width: 500px) {
     .container, .card { max-width: 99vw; }
     .card { padding: 13px 2px 10px 2px; }
@@ -141,6 +137,7 @@ href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
 // Populando os selects de dia, mês e ano
 (function popularCamposData(){
@@ -175,7 +172,31 @@ href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   }
 })();
 
-function validar() {
+// Configuração do Supabase - ATUALIZE ESTAS CREDENCIAIS
+const supabaseUrl = "https://zywrttshgdtzhkhksdf.supabase.co"; // SUBSTITUA pela sua URL
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5d3J0dHNoZ2R0ZWh6aGtoc2RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4MDg3NzgsImV4cCI6MjA2NjM4NDc3OH0.z08kMWbZKB2u6WgoM0AfXBQij9V42T3YdzA4m7_DdtQ"; // SUBSTITUA pela sua chave
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// Função para testar conexão com Supabase
+async function testarConexao() {
+  try {
+    const { data, error } = await supabase
+      .from('ValidacaoFusma')
+      .select('count', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error('Erro na conexão:', error);
+      return false;
+    }
+    console.log('Conexão com Supabase OK');
+    return true;
+  } catch (error) {
+    console.error('Erro ao testar conexão:', error);
+    return false;
+  }
+}
+
+async function validar() {
   const nip = document.getElementById("nip").value.trim();
   const dia = document.getElementById("dia").value;
   const mes = document.getElementById("mes").value;
@@ -184,11 +205,11 @@ function validar() {
   const loading = document.getElementById("loading");
   const btnValidar = document.getElementById("btnValidar");
 
-  msg.innerText = "";
+  msg.innerHTML = "";
 
   // Verifica se todos os campos da data foram preenchidos
   if (!nip || !dia || !mes || !ano) {
-    msg.innerText = "Preencha todos os campos.";
+    msg.innerHTML = '<div class="alert alert-warning">Preencha todos os campos.</div>';
     return;
   }
 
@@ -199,52 +220,150 @@ function validar() {
   const dataNasc = new Date(`${ano}-${mes}-${dia}`);
   const hoje = new Date();
   if(dataNasc > hoje){
-    msg.innerText = "Data de nascimento não pode ser no futuro.";
+    msg.innerHTML = '<div class="alert alert-warning">Data de nascimento não pode ser no futuro.</div>';
     return;
   }
 
   loading.style.display = "block";
   btnValidar.disabled = true;
 
-  google.script.run
-  .withSuccessHandler(function(resposta) {
-    if (resposta && resposta.status === "ok") {
-      sessionStorage.setItem("nip", nip);
-      sessionStorage.setItem("nome", resposta.nome);
-      sessionStorage.setItem("nascimento", nascimento);
-      sessionStorage.setItem("cidade", resposta.cidade || "");
+  // Primeiro, testa a conexão
+  const conexaoOk = await testarConexao();
+  if (!conexaoOk) {
+    loading.style.display = "none";
+    btnValidar.disabled = false;
+    msg.innerHTML = '<div class="alert alert-danger">Erro de conexão com o banco de dados. Verifique suas credenciais do Supabase.</div>';
+    return;
+  }
 
-      google.script.run
-        .withSuccessHandler(function(existe) {
-          loading.style.display = "none";
-          btnValidar.disabled = false;
-          if (existe) {
-            msg.innerText = "Este NIP já possui cadastro no sistema.";
-          } else {
-            window.top.location.href = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=cadastroFinal";
-          }
-        })
-        .withFailureHandler(function(error) {
-          loading.style.display = "none";
-          btnValidar.disabled = false;
-          msg.innerText = "Erro ao verificar cadastro existente: " + error.message;
-          console.error("Erro verificarCadastroExistente:", error);
-        })
-        .verificarCadastroExistente(nip);
+  try {
+    console.log('Buscando NIP:', nip, 'Data:', nascimento);
+    
+    // Busca com múltiplas tentativas de formatação de data
+    let data = null;
+    let error = null;
+    
+    // Tentativa 1: Formato yyyy-mm-dd
+    const tentativas = [
+      nascimento, // 2024-01-15
+      `${dia}/${mes}/${ano}`, // 15/01/2024
+      `${mes}/${dia}/${ano}`, // 01/15/2024
+      `${dia}-${mes}-${ano}`, // 15-01-2024
+    ];
+    
+    for (let formatoData of tentativas) {
+      console.log('Tentando formato de data:', formatoData);
+      
+      const resultado = await supabase
+        .from('ValidacaoFusma')
+        .select('*') // Busca todos os campos primeiro
+        .eq('NIP', nip)
+        .eq('DataNascimento', formatoData)
+        .maybeSingle();
+      
+      if (resultado.data) {
+        data = resultado.data;
+        error = null;
+        console.log('Encontrado com formato:', formatoData);
+        break;
+      } else if (resultado.error && !resultado.error.message.includes('No rows found')) {
+        error = resultado.error;
+        break;
+      }
+    }
+    
+    // Se não encontrou com nenhum formato, tenta buscar apenas por NIP para debug
+    if (!data && !error) {
+      console.log('Tentando buscar apenas por NIP para debug...');
+      const debugResult = await supabase
+        .from('ValidacaoFusma')
+        .select('*')
+        .eq('NIP', nip)
+        .maybeSingle();
+      
+      if (debugResult.data) {
+        console.log('Registro encontrado com este NIP:', debugResult.data);
+        console.log('Data no banco:', debugResult.data.DataNascimento);
+        console.log('Data informada:', nascimento);
+        msg.innerHTML = '<div class="alert alert-warning">NIP encontrado, mas a data de nascimento não confere. Verifique a data informada.</div>';
+      } else {
+        console.log('NIP não encontrado na base de dados');
+        msg.innerHTML = '<div class="alert alert-warning">NIP não encontrado na base de dados.</div>';
+      }
+      loading.style.display = "none";
+      btnValidar.disabled = false;
+      return;
+    }
+
+    if (error) {
+      throw error;
+    }
+
+    if (data) {
+      console.log('Dados encontrados:', data);
+      
+      // Armazena dados validados para próximo passo
+      sessionStorage.setItem("nip", data.NIP || data.nip);
+      sessionStorage.setItem("nome", data.Nome || data.nome);
+      sessionStorage.setItem("nascimento", data.DataNascimento || data.datanascimento);
+      sessionStorage.setItem("cidade", data.Cidade || data.cidade || "");
+
+      // Verifica se existe google.script.run (Apps Script)
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        // Chama Apps Script para verificar cadastro existente
+        google.script.run
+          .withSuccessHandler(function(existe) {
+            loading.style.display = "none";
+            btnValidar.disabled = false;
+            if (existe) {
+              msg.innerHTML = '<div class="alert alert-info">Este NIP já possui cadastro no sistema.</div>';
+            } else {
+              window.top.location.href = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=cadastroFinal";
+            }
+          })
+          .withFailureHandler(function(error) {
+            loading.style.display = "none";
+            btnValidar.disabled = false;
+            msg.innerHTML = '<div class="alert alert-danger">Erro ao verificar cadastro existente: ' + error.message + '</div>';
+            console.error("Erro verificarCadastroExistente:", error);
+          })
+          .verificarCadastroExistente(nip);
+      } else {
+        // Se não está no Apps Script, prossegue direto
+        loading.style.display = "none";
+        btnValidar.disabled = false;
+        msg.innerHTML = '<div class="alert alert-success">Validação realizada com sucesso! Redirecionando...</div>';
+        setTimeout(() => {
+          window.location.href = "https://script.google.com/macros/s/AKfycbz5Itbq5RwTiGaYohdabt4XiQNmEGITsvEzDjCPS95XUHKSLGWYjADuX7TDkoou58dt/exec?page=cadastroFinal";
+        }, 2000);
+      }
     } else {
       loading.style.display = "none";
       btnValidar.disabled = false;
-      msg.innerText = resposta && resposta.msg ? resposta.msg : "Erro na validação. Verifique os dados.";
+      msg.innerHTML = '<div class="alert alert-warning">NIP ou data de nascimento não conferem com a base. Verifique os dados informados.</div>';
     }
-  })
-  .withFailureHandler(function(error) {
+  } catch (error) {
     loading.style.display = "none";
     btnValidar.disabled = false;
-    msg.innerText = "Erro de comunicação com o servidor: " + error.message;
-    console.error("Erro verificarFusma:", error);
-  })
-  .verificarFusma(nip, nascimento);
-
+    
+    console.error("Erro detalhado:", error);
+    
+    let errorMessage = "Erro de comunicação com o banco de dados.";
+    
+    if (error.message) {
+      if (error.message.includes('Failed to fetch')) {
+        errorMessage = "Erro de conexão. Verifique sua internet e as configurações do Supabase.";
+      } else if (error.message.includes('Invalid API key')) {
+        errorMessage = "Chave de API do Supabase inválida.";
+      } else if (error.message.includes('relation') && error.message.includes('does not exist')) {
+        errorMessage = "Tabela 'ValidacaoFusma' não encontrada no banco de dados.";
+      } else {
+        errorMessage = `Erro: ${error.message}`;
+      }
+    }
+    
+    msg.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+  }
 }
 
 // Usabilidade mobile: Enter avança entre campos ou valida
@@ -276,6 +395,8 @@ document.getElementById("ano").addEventListener("keypress", function(e) {
 // Foco automático no NIP ao carregar
 window.onload = function() {
   document.getElementById('nip').focus();
+  // Testa conexão ao carregar
+  testarConexao();
 };
 </script>
 </body>
