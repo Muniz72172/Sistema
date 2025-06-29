@@ -1,0 +1,64 @@
+Fluxo e Estrutura Conceitual do Formulário – Liberação Dirigida (Admin)
+1. Escolha da Data da Viagem
+Admin seleciona ou digita a data desejada.
+
+Sistema verifica se a data está ativa/liberada para agendamento (consulta aba ConfigOnibus).
+
+Exibe imediatamente:
+
+Situação do ônibus (lotado/não lotado).
+
+Status individual dos assentos especiais (43, 44, 45, 46), indicando quais estão livres e quais já foram ocupados (nome do usuário caso já alocado).
+
+2. Identificação do Usuário
+Admin digita o NIP do usuário que receberá a liberação.
+
+Sistema busca automaticamente na aba UsuariosCadastrados:
+
+Se não encontrado, exibe erro e bloqueia o preenchimento.
+
+Se encontrado, preenche automaticamente os campos: nome, idade, celular, vínculo, e status PCD (todos readonly).
+
+3. Parâmetros da Liberação
+Destino: admin seleciona o destino (HNMD, PNNSG, OCM, etc.).
+
+Tipo de Viagem: admin seleciona entre “Ida”, “Volta” ou “Ida e Volta”.
+
+Assento: admin seleciona apenas entre 43, 44, 45 e 46 — somente os que estiverem livres para a data escolhida (bloqueados se já ocupados).
+
+(Opcional) Acompanhante: se o fluxo permitir, pode haver campo extra para dados do acompanhante.
+
+4. Justificativa da Liberação
+Campo livre e obrigatório para o admin descrever o motivo da liberação dirigida.
+
+Garantia de rastreabilidade e responsabilidade.
+
+5. Confirmação e Registro
+Admin revisa todos os dados na tela.
+
+Ao confirmar:
+
+Sistema valida todas as regras (assento livre, usuário não agendado na mesma data, campos obrigatórios, etc).
+
+Registra a liberação na aba de Agendamentos, com origem “Liberado Dirigido”.
+
+Registra log detalhado para relatório/auditoria.
+
+Gera registro para relatório de liberações dirigidas.
+
+6. Notificação ao Usuário
+Envia automaticamente um e-mail ao usuário beneficiado, informando sobre a liberação do assento, data, destino e justificativa.
+
+7. Feedback Visual
+Mensagem de sucesso na tela para o admin, com resumo da operação.
+
+Alerta de erro detalhado em caso de conflito, usuário inexistente, etc.
+
+Restrições e Observações
+Qualquer usuário cadastrado pode ser beneficiado, independente de fila de espera ou vínculo.
+
+Não pode haver dupla alocação para a mesma data/usuário.
+
+Justificativa sempre obrigatória e livre.
+
+Auditoria garantida: quem fez, para quem, quando e por quê.
