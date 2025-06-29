@@ -1,87 +1,381 @@
-<!-- listaPresenca.html.txt -->
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Presença - Ônibus</title>
+  <title>Lista de Agendamentos - Painel Admin Ônibus</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
-    @media print {
-      .no-print { display: none; }
+    body {
+      background: linear-gradient(120deg, #e6eafc 0%, #fafafa 100%);
+      min-height: 100vh;
+    }
+    .container-custom {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 28px rgba(55,90,127,0.09);
+      padding: 2.5rem 2rem 2rem 2rem;
+      max-width: 900px;
+      margin: 40px auto;
+      border: none;
+    }
+    .page-title {
+      color: #375a7f;
+      font-weight: 700;
+      margin-bottom: 1.3rem;
+      letter-spacing: 0.01em;
+      font-size: 1.25rem;
+    }
+    .metrics-panel {
+      margin-bottom: 1.6rem;
+    }
+    .metric-card {
+      border-radius: 14px;
+      background: #f7faff;
+      box-shadow: 0 2px 12px rgba(55,90,127,0.06);
+      padding: 1.3rem 1rem 1rem 1rem;
+      margin-bottom: 15px;
+      min-width: 180px;
+    }
+    .metric-title {
+      color: #375a7f;
+      font-weight: 600;
+      font-size: 1.01rem;
+      margin-bottom: 2px;
+      letter-spacing: .01em;
+    }
+    .metric-value {
+      font-size: 1.45rem;
+      font-weight: bold;
+      color: #20406a;
+    }
+    .metric-icon {
+      font-size: 1.7rem;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .metric-blue { color: #375a7f; }
+    .metric-green { color: #28a745; }
+    .metric-yellow { color: #ffc107; }
+    .metric-purple { color: #6f42c1; }
+    .metric-pink { color: #e83e8c; }
+    .resume-panel {
+      background: #f6f9ff;
+      border-radius: 13px;
+      box-shadow: 0 2px 10px rgba(55,90,127,0.06);
+      padding: 18px 10px 10px 10px;
+      margin-bottom: 1.3rem;
+    }
+    .resume-panel .resume-title {
+      color: #375a7f;
+      font-weight: 600;
+      font-size: 1.01rem;
+      margin-bottom: 4px;
+      letter-spacing: .02em;
+    }
+    .resume-panel .resume-value {
+      font-size: 1.19rem;
+      font-weight: bold;
+      color: #20406a;
+    }
+    .filter-row {
+      margin-bottom: 1.5rem;
+    }
+    .table th, .table td {
+      vertical-align: middle !important;
+      text-align: center;
+    }
+    .status-badge {
+      font-size: 0.92rem;
+      padding: .5em 1em;
+      border-radius: 12px;
+    }
+    .agendado { background: #d1e7dd; color: #0f5132; }
+    .reserva { background: #fff3cd; color: #856404; }
+    .titular { background: #d0f0fd; color: #0a4157; }
+    .acompanhante { background: #e2e3e5; color: #3b3b3b; }
+    .fade-in {
+      animation: fadeIn .7s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .btn-action {
+      min-width: 90px;
+    }
+    .table-responsive { margin-bottom: 2rem; }
+    @media (max-width: 600px) {
+      .container-custom { padding: 1.2rem 0.5rem 1.7rem 0.5rem; }
+      .page-title { font-size: 1.1rem; }
+      .metric-card { min-width: 130px; padding: 1rem 0.6rem 0.8rem 0.6rem;}
+      .metric-title { font-size: 0.95rem; }
+      .metric-value { font-size: 1.15rem;}
+      .metric-icon { font-size: 1.3rem;}
     }
   </style>
 </head>
-<body class="bg-white">
-  <div class="container py-4">
-    <div class="no-print mb-4">
-      <h4 class="mb-3">Gerar Lista de Presença</h4>
-      <div class="form-inline mb-3">
-        <label class="mr-2" for="data">Data:</label>
-        <input type="date" id="data" class="form-control mr-2">
-        <label class="mr-2" for="destino">Destino:</label>
-        <select id="destino" class="form-control mr-2">
-          <option value="">Selecione</option>
-          <option value="HNMD">HNMD</option>
-          <option value="PNNSG">PNNSG</option>
-          <option value="OCM">OCM</option>
-        </select>
-        <button class="btn btn-primary" onclick="gerarLista()">Gerar</button>
-        <button class="btn btn-outline-secondary ml-2" onclick="window.print()">Imprimir</button>
+<body>
+  <div class="container-custom shadow fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="page-title"><i class="bi bi-list-ul"></i> Lista de Agendamentos</span>
+      <button class="btn btn-outline-secondary btn-sm" onclick="voltarPainel()"><i class="bi bi-arrow-left"></i> Voltar ao Painel</button>
+    </div>
+    <!-- Painel de Métricas Gerais -->
+    <div class="metrics-panel row text-center" id="metricsPanel">
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <span class="metric-icon metric-blue"><i class="bi bi-people-fill"></i></span>
+          <span class="metric-title">Agendados</span>
+          <div class="metric-value" id="metricTotalAgendados">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <span class="metric-icon metric-green"><i class="bi bi-person-badge-fill"></i></span>
+          <span class="metric-title">Titulares</span>
+          <div class="metric-value" id="metricTotalTitulares">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <span class="metric-icon metric-yellow"><i class="bi bi-bookmark-star-fill"></i></span>
+          <span class="metric-title">Reservas</span>
+          <div class="metric-value" id="metricTotalReservas">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <span class="metric-icon metric-purple"><i class="bi bi-calendar2-check-fill"></i></span>
+          <span class="metric-title">Datas Ativas</span>
+          <div class="metric-value" id="metricTotalDatasAtivas">0</div>
+        </div>
       </div>
     </div>
-
-    <table class="table table-bordered table-sm">
-      <thead>
-        <tr>
-          <th>Nº</th>
-          <th>NIP</th>
-          <th>Nome</th>
-          <th>Assento</th>
-          <th>PCD</th>
-          <th>Acompanhante</th>
-          <th>Assinatura</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaPresenca"></tbody>
-    </table>
-
-    <div class="no-print">
-      <a href="?page=adminOnibus" class="btn btn-secondary mt-3">Voltar</a>
+    <!-- Filtros -->
+    <form id="filtroForm" class="filter-row row align-items-end mb-4" onsubmit="buscarAgendamentos(); return false;">
+      <div class="form-group col-md-6 mb-2">
+        <label for="dataFiltro">Data do Agendamento</label>
+        <input type="date" class="form-control" id="dataFiltro" name="dataFiltro" required>
+      </div>
+      <div class="form-group col-md-4 mb-2">
+        <label for="tipoFiltro">Tipo</label>
+        <select class="form-control" id="tipoFiltro" name="tipoFiltro">
+          <option value="todos">Todos</option>
+          <option value="titular">Titulares</option>
+          <option value="acompanhante">Acompanhantes</option>
+          <option value="reserva">Reservas</option>
+        </select>
+      </div>
+      <div class="form-group col-md-2 mb-2">
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+    </form>
+    <!-- Painel de Indicadores -->
+    <div class="resume-panel row text-center" id="painelResumo" style="display:none;">
+      <div class="col-6 col-md resume-title">
+        <div class="resume-title">Total Agendamentos</div>
+        <div class="resume-value" id="totalAg">0</div>
+      </div>
+      <div class="col-6 col-md resume-title">
+        <div class="resume-title">Titulares</div>
+        <div class="resume-value" id="totalTitulares">0</div>
+      </div>
+      <div class="col-6 col-md resume-title">
+        <div class="resume-title">Acompanhantes</div>
+        <div class="resume-value" id="totalAcompanhantes">0</div>
+      </div>
+      <div class="col-6 col-md resume-title">
+        <div class="resume-title">Reservas</div>
+        <div class="resume-value" id="totalReservas">0</div>
+      </div>
+      <div class="col-12 col-md resume-title mt-2 mt-md-0">
+        <div class="resume-title">Vagas Disponíveis</div>
+        <div class="resume-value" id="vagasDisponiveis">0</div>
+      </div>
+      <div class="col-12 col-md resume-title mt-2 mt-md-0">
+        <div class="resume-title">Assentos Reservados Ocupados (43,44,45,46)</div>
+        <div class="resume-value" id="assentosReservadosOcupados">0</div>
+      </div>
     </div>
+    <!-- Tabela de Agendamentos -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-sm bg-white shadow-sm mb-0" id="tabelaAgendamentos">
+        <thead class="thead-light">
+          <tr>
+            <th>Data</th>
+            <th>Nome</th>
+            <th>NIP</th>
+            <th>Assento</th>
+            <th>PCD</th>
+            <th>Tipo de Vaga</th>
+            <th>Acompanhante</th>
+            <th>Tipo de Viagem</th>
+            <th>Celular</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Linhas preenchidas via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+    <div id="mensagemStatus" style="min-height:28px;" class="text-center text-muted"></div>
   </div>
-
   <script>
+    // Proteção de sessão
     if (!sessionStorage.getItem("nipAdminOnibus")) {
-      window.location.href = "?page=loginAdmin";
+      window.location.href = "?page=loginAdminOnibus";
     }
 
-    function gerarLista() {
-      const data = document.getElementById("data").value;
-      const destino = document.getElementById("destino").value;
-      if (!data || !destino) {
-        alert("Informe data e destino.");
+    function carregarMetricasGerais() {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          document.getElementById('metricTotalAgendados').innerText = res.totalAgendados || 0;
+          document.getElementById('metricTotalTitulares').innerText = res.totalTitulares || 0;
+          document.getElementById('metricTotalReservas').innerText = res.totalReservas || 0;
+          document.getElementById('metricTotalDatasAtivas').innerText = res.totalDatasAtivas || 0;
+        })
+        .withFailureHandler(function() {
+          document.getElementById('metricTotalAgendados').innerText = 0;
+          document.getElementById('metricTotalTitulares').innerText = 0;
+          document.getElementById('metricTotalReservas').innerText = 0;
+          document.getElementById('metricTotalDatasAtivas').innerText = 0;
+        })
+        .resumoGeralAgendamentos();
+    }
+
+    function buscarAgendamentos() {
+      const dataFiltro = document.getElementById('dataFiltro').value;
+      if (!dataFiltro) {
+        document.getElementById('mensagemStatus').innerText = "Selecione uma data.";
         return;
       }
-      google.script.run.withSuccessHandler(function(lista) {
-        const tabela = document.getElementById("tabelaPresenca");
-        tabela.innerHTML = "";
-        lista.forEach((p, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${p.nip}</td>
-            <td>${p.nome}</td>
-            <td>${p.assento}</td>
-            <td>${p.pcd ? "Sim" : "Não"}</td>
-            <td>${p.acompanhante ? "Sim" : "Não"}</td>
-            <td></td>`;
-          tabela.appendChild(tr);
-        });
-        google.script.run.registrarEventoOnibus(data, destino, "Lista de Presença Gerada");
-      }).gerarListaPresenca(data, destino);
+      document.getElementById('mensagemStatus').innerText = "Buscando...";
+      google.script.run
+        .withSuccessHandler(function(res) {
+          preencherResumo(res.resumo);
+          exibirTabelaAgendamentos(res.lista);
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById('mensagemStatus').innerText = err.message || "Erro ao buscar agendamentos.";
+          document.getElementById('painelResumo').style.display = "none";
+          exibirTabelaAgendamentos([]);
+        })
+        .carregarPainelAgendamentoPorData(dataFiltro);
+    }
+
+    function preencherResumo(resumo) {
+      if (!resumo) {
+        document.getElementById('painelResumo').style.display = "none";
+        return;
+      }
+      document.getElementById('painelResumo').style.display = "";
+      document.getElementById('totalAg').innerText = resumo.total || 0;
+      document.getElementById('totalTitulares').innerText = resumo.titulares || 0;
+      document.getElementById('totalAcompanhantes').innerText = resumo.acompanhantes || 0;
+      document.getElementById('totalReservas').innerText = resumo.reservas || 0;
+      document.getElementById('vagasDisponiveis').innerText = resumo.vagasDisponiveis ?? "-";
+      document.getElementById('assentosReservadosOcupados').innerText = resumo.assentosReservadosOcupados ?? "0";
+    }
+
+    function exibirTabelaAgendamentos(lista) {
+      const tipoFiltro = document.getElementById('tipoFiltro').value;
+      const tbody = document.querySelector('#tabelaAgendamentos tbody');
+      tbody.innerHTML = '';
+      let filtrados = lista || [];
+      if (tipoFiltro !== "todos") {
+        filtrados = filtrados.filter(x => x.tipoVaga === tipoFiltro);
+      }
+      if (filtrados.length === 0) {
+        document.getElementById('mensagemStatus').innerText = 'Nenhum agendamento encontrado.';
+        return;
+      }
+      document.getElementById('mensagemStatus').innerText = '';
+      filtrados.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.classList.add('fade-in');
+        tr.innerHTML = `
+          <td>${formataDataBR(item.data)}</td>
+          <td>${item.nome || ""}</td>
+          <td>${item.nip || ""}</td>
+          <td>${item.assento || ""}</td>
+          <td>${item.pcd || ""}</td>
+          <td>
+            <span class="badge status-badge ${item.tipoVaga}">
+              ${capitalizeFirst(item.tipoVaga)}
+            </span>
+          </td>
+          <td>${item.acompanhante || ""}</td>
+          <td>${item.tipoViagem || ""}</td>
+          <td>${item.celular || ""}</td>
+          <td>
+            <span class="badge status-badge ${item.status === 'Agendado' ? 'agendado' : 'reserva'}">
+              ${item.status}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-outline-info btn-sm" title="Detalhes" onclick="mostrarDetalhes(${encodeURIComponent(JSON.stringify(item))})"><i class="bi bi-eye"></i></button>
+            <button class="btn btn-outline-danger btn-sm" title="Cancelar" onclick="cancelarAgendamento('${item.id || ''}')"><i class="bi bi-x"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function capitalizeFirst(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function formataDataBR(dataISO) {
+      if (!dataISO) return '';
+      const [y, m, d] = dataISO.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function mostrarDetalhes(itemStr) {
+      const item = JSON.parse(decodeURIComponent(itemStr));
+      alert(
+        `Nome: ${item.nome}\nNIP: ${item.nip}\nAssento: ${item.assento}\nTipo de Vaga: ${capitalizeFirst(item.tipoVaga)}\nPCD: ${item.pcd}\nAcompanhante: ${item.acompanhante}\nTipo de Viagem: ${item.tipoViagem}\nCelular: ${item.celular}\nStatus: ${item.status}`
+      );
+    }
+
+    function cancelarAgendamento(id) {
+      if (!id) return alert("Agendamento sem ID.");
+      if (!confirm("Deseja cancelar este agendamento?")) return;
+      document.getElementById('mensagemStatus').innerText = "Cancelando...";
+      google.script.run
+        .withSuccessHandler(function(msg) {
+          alert(msg || "Agendamento cancelado.");
+          buscarAgendamentos();
+        })
+        .withFailureHandler(function(err) {
+          alert(err.message || "Erro ao cancelar agendamento.");
+        })
+        .cancelarAgendamentoPorId(id);
+    }
+
+    // Carregar painel automaticamente se já houver data selecionada e carregar métricas gerais ao abrir tela
+    window.onload = function() {
+      carregarMetricasGerais();
+      if (document.getElementById('dataFiltro').value) {
+        buscarAgendamentos();
+      }
+    }
+
+    // CORREÇÃO DO BOTÃO VOLTAR AO PAINEL (igual gerenciarDatas)
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
+    function voltarPainel() {
+      const a = document.createElement("a");
+      a.href = BASE_URL + "?page=adminOnibus";
+      a.target = "_top";
+      a.click();
     }
   </script>
 </body>
