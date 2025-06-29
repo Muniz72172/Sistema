@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liberação Dirigida - Ônibus</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h4 class="mb-4">Liberação Dirigida de Assento</h4>
+
+    <div class="form-group">
+      <label for="data">Data:</label>
+      <input type="date" id="data" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="destino">Destino:</label>
+      <select id="destino" class="form-control">
+        <option value="">Selecione</option>
+        <option value="HNMD">HNMD</option>
+        <option value="PNNSG">PNNSG</option>
+        <option value="OCM">OCM</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="assento">Assento a liberar (43 a 46):</label>
+      <input type="number" id="assento" class="form-control" min="43" max="46">
+    </div>
+
+    <div class="form-group">
+      <label for="nip">NIP do Usuário:</label>
+      <input type="text" id="nip" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="justificativa">Justificativa:</label>
+      <textarea id="justificativa" class="form-control"></textarea>
+    </div>
+
+    <button class="btn btn-success" onclick="liberar()">Liberar Assento</button>
+    <a href="?page=adminOnibus" class="btn btn-secondary ml-2">Voltar</a>
+    <div id="mensagem" class="text-success mt-3"></div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem("nipAdminOnibus")) {
+      window.location.href = "?page=loginAdmin";
+    }
+
+    function liberar() {
+      const data = document.getElementById("data").value;
+      const destino = document.getElementById("destino").value;
+      const assento = document.getElementById("assento").value;
+      const nip = document.getElementById("nip").value.trim();
+      const justificativa = document.getElementById("justificativa").value.trim();
+
+      if (!data || !destino || !assento || !nip || !justificativa) {
+        alert("Preencha todos os campos.");
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function() {
+        document.getElementById("mensagem").innerText = "Assento liberado com sucesso.";
+      }).liberarAssentoParaUsuario(data, destino, assento, nip, justificativa);
+    }
+  </script>
+</body>
+</html>
