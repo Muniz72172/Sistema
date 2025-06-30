@@ -1,42 +1,98 @@
+🚌 Resumo Técnico – Marcação de Ônibus e Lógica de Assentos PNSPA
+Estrutura de Assentos e Políticas de Uso
+Total de assentos por ônibus: 46
 
-🚌 Resumo Técnico – Marcação de Ônibus e Lógica de Assentos
-Ao realizar a marcação de transporte, o sistema da PNSPA aplica regras específicas para organização dos assentos e controle de lotação, considerando titular solo, titular com acompanhante e situações de fila de espera.
+Assentos bloqueados: 7 e 8 (nunca podem ser selecionados ou marcados)
 
-🎫 1. Marcação Normal (Com Assento Disponível)
+Assentos reservados: 43, 44, 45 e 46 (exclusivos para liberação manual via painel adminOnibus.html)
+
+Assentos disponíveis ao público: 40 (1–6, 9–42)
+
+Se TODOS os 40 assentos forem ocupados, o sistema identifica o ônibus como lotado.
+
+1. Marcação Normal (Vagas Disponíveis)
 a) Usuário Solo (sem acompanhante)
-O sistema atribui automaticamente um assento disponível.
+Sistema atribui automaticamente o próximo assento livre.
 
-Esse número é gravado na coluna ASSENTO da planilha Agendamentos.
+Valor gravado na coluna ASSENTO (planilha Agendamentos).
 
-Exemplo: ASSENTO = 3.
+Exemplo: ASSENTO = 5.
 
-b) Usuário com Acompanhante
-O sistema reserva dois assentos sequenciais ou próximos, quando disponíveis.
+b) Usuário com acompanhante
+Sistema busca dois assentos livres sequenciais (ou os mais próximos possíveis).
 
-Ambos os assentos são anotados na mesma célula, separados por vírgula.
+Ambos os assentos são gravados juntos (separados por vírgula).
 
-Exemplo: ASSENTO = 1,2.
+Exemplo: ASSENTO = 12,13
 
-O campo ACOMPANHANTE recebe o nome ou referência do acompanhante.
+O campo ACOMPANHANTE recebe nome ou referência do acompanhante.
 
-🕓 2. Marcação em Fila de Espera (Ônibus Lotado)
-Quando todos os assentos estão ocupados para determinada data:
+Observação:
+Assentos bloqueados (7 e 8) nunca entram na busca automática.
+Assentos reservados (43–46) só aparecem para seleção se o admin liberar manualmente para algum caso especial (idoso, gestante, PCD etc).
 
-a) Usuário Solo na Fila de Espera
-Recebe um código no formato RXX, onde XX é sua posição na fila.
+2. Fila de Espera (Ônibus Lotado)
+Quando todos os 40 assentos padrão estão ocupados para a data selecionada:
 
-Exemplo: o primeiro da fila será ASSENTO = R1, o segundo R2, e assim por diante.
+a) Usuário solo na fila
+Recebe um código no formato RXX (XX = posição na fila).
 
-O campo STATUS é definido como "Reserva".
+Exemplo: 1º da fila: ASSENTO = R1, 2º: R2, etc.
 
-b) Usuário com Acompanhante na Fila de Espera
-Tanto o titular quanto o acompanhante recebem o mesmo código de reserva.
+O campo STATUS recebe: "Reserva".
 
-Exemplo: se forem o segundo grupo da fila, ambos recebem R2.
+b) Usuário com acompanhante na fila
+Ambos (titular e acompanhante) recebem o mesmo código de reserva.
 
-📒 Exemplos Práticos
+Exemplo: 2º grupo da fila: ASSENTO = R2 para ambos.
+
+STATUS: "Reserva"
+
+3. Casos Especiais
+Assentos 43–46 (reservados):
+
+Só podem ser atribuídos pelo adminOnibus no painel administrativo, nunca por usuários comuns.
+
+Usados tipicamente para casos de acessibilidade, autoridade ou necessidade operacional.
+
+Se liberados pelo admin, podem aumentar temporariamente a capacidade total.
+
+Assentos bloqueados (7 e 8):
+
+Sempre fora da lógica de marcação e não entram no cálculo de lotação.
+
+4. Fluxo do Sistema e Auditoria
+Marcação de assento só é permitida para usuários ativos e validados.
+
+Todos os dados são registrados em Agendamentos, HistoricoUsuarios e HistoricoGeralUsuarios.
+
+Usuários na fila de espera podem ser promovidos automaticamente em caso de cancelamento, conforme a função processarAlocacaoFilaDiaria.
+
+5. Exemplos Práticos
 Tipo	Assento	Acompanhante	Status
 Solo com vaga	5	-	Agendado
 Com acompanhante	12,13	João da Silva	Agendado
-Solo na fila espera	R3	-	Reserva
-Com acompanhante fila	R4	Maria Costa	Reserva
+Solo na fila de espera	R3	-	Reserva
+Com acompanhante na fila	R4	Maria Costa	Reserva
+Liberado admin (exemplo)	43	-	Agendado*
+
+* Apenas se liberado manualmente pelo administrador.
+
+6. Critérios para Ônibus Lotado e Abertura de Fila de Espera
+O ônibus é considerado lotado quando os 40 assentos de uso geral estão ocupados.
+
+A partir desse momento, só é possível entrar na Fila de Espera; novas vagas só surgem por cancelamento ou liberação administrativa.
+
+Resumo Visual:
+Assentos para usuários: 1–6, 9–42 → 40 assentos.
+
+Bloqueados: 7, 8 → nunca usados.
+
+Reservados (admin): 43, 44, 45, 46.
+
+Recomendações Técnicas
+Valide sempre a disponibilidade real, desconsiderando bloqueados e reservados.
+
+Exiba bloqueados como "indisponível" e reservados como "restrito/admin" na interface.
+
+Registre o motivo ao liberar assento reservado no painel administrativo para fins de auditoria.
