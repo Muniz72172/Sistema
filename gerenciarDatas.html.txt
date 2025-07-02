@@ -85,7 +85,10 @@
     <div class="rounded-card p-4 mb-4 shadow fade-in">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <span class="section-title"><i class="bi bi-calendar2-event"></i> Gerenciar Datas de Agendamento</span>
-        <a href="?page=adminOnibus" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar ao Painel</a>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="voltarPainel()">
+  <i class="bi bi-arrow-left"></i> Voltar ao Painel
+</button>
+
       </div>
       <form id="formNovaData" class="mb-4" onsubmit="adicionarData(event)">
         <div class="form-row align-items-end">
@@ -262,5 +265,17 @@
 
     window.onload = carregarDatas;
   </script>
+
+<script>
+  const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
+  function voltarPainel() {
+    const a = document.createElement("a");
+    a.href = BASE_URL + "?page=menuAdminOnibus";
+    a.target = "_top";
+    a.click();
+  }
+</script>
+
+
 </body>
 </html>
