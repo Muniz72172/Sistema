@@ -9,8 +9,8 @@ function doGet(e) {
       return HtmlService.createHtmlOutputFromFile('validarCadastroAdminOnibus.html');
     case 'cadastroSenhaAdminOnibus':
       return HtmlService.createHtmlOutputFromFile('cadastroSenhaAdminOnibus.html');
-    case 'adminOnibus':
-      return HtmlService.createHtmlOutputFromFile('adminOnibus.html');
+    case 'menuAdminOnibus':
+      return HtmlService.createHtmlOutputFromFile('menuAdminOnibus.html');
     case 'gerenciarDatas':
       return HtmlService.createHtmlOutputFromFile('gerenciarDatas.html');
     case 'listarAgendados':
@@ -21,6 +21,8 @@ function doGet(e) {
       return HtmlService.createHtmlOutputFromFile('liberacaoDirigida.html');
     case 'listaPresenca':
       return HtmlService.createHtmlOutputFromFile('listaPresenca.html');
+    case 'listaAgendamentos':
+      return HtmlService.createHtmlOutputFromFile('listaAgendamento.html');
     default:
       return HtmlService.createHtmlOutput('<h3>Página não encontrada</h3>');
   }
