@@ -135,8 +135,8 @@
       <div class="col-6 col-md-3">
         <div class="metric-card">
           <span class="metric-icon metric-green"><i class="bi bi-person-badge-fill"></i></span>
-          <span class="metric-title">Titulares</span>
-          <div class="metric-value" id="metricTotalTitulares">0</div>
+          <span class="metric-title">Vagas Ocupadas</span>
+          <div class="metric-value" id="metricTotalOcupandoVaga">0</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
@@ -182,8 +182,8 @@
         <div class="resume-value" id="totalAg">0</div>
       </div>
       <div class="col-6 col-md resume-title">
-        <div class="resume-title">Titulares</div>
-        <div class="resume-value" id="totalTitulares">0</div>
+        <div class="resume-title">Ocupando Vaga</div>
+        <div class="resume-value" id="totalOcupandoVaga">0</div>
       </div>
       <div class="col-6 col-md resume-title">
         <div class="resume-title">Acompanhantes</div>
@@ -237,13 +237,13 @@
       google.script.run
         .withSuccessHandler(function(res) {
           document.getElementById('metricTotalAgendados').innerText = res.totalAgendados || 0;
-          document.getElementById('metricTotalTitulares').innerText = res.totalTitulares || 0;
+          document.getElementById('metricTotalOcupandoVaga').innerText = res.totalOcupandoVaga || 0;
           document.getElementById('metricTotalReservas').innerText = res.totalReservas || 0;
           document.getElementById('metricTotalDatasAtivas').innerText = res.totalDatasAtivas || 0;
         })
         .withFailureHandler(function() {
           document.getElementById('metricTotalAgendados').innerText = 0;
-          document.getElementById('metricTotalTitulares').innerText = 0;
+          document.getElementById('metricTotalOcupandoVaga').innerText = 0;
           document.getElementById('metricTotalReservas').innerText = 0;
           document.getElementById('metricTotalDatasAtivas').innerText = 0;
         })
@@ -277,7 +277,7 @@
       }
       document.getElementById('painelResumo').style.display = "";
       document.getElementById('totalAg').innerText = resumo.total || 0;
-      document.getElementById('totalTitulares').innerText = resumo.titulares || 0;
+      document.getElementById('totalOcupandoVaga').innerText = resumo.ocupandoVaga || 0;
       document.getElementById('totalAcompanhantes').innerText = resumo.acompanhantes || 0;
       document.getElementById('totalReservas').innerText = resumo.reservas || 0;
       document.getElementById('vagasDisponiveis').innerText = resumo.vagasDisponiveis ?? "-";
