@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Liberação Dirigida - Ônibus</title>
+  <title>Liberação Dirigida de Assento - Admin Ônibus</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
@@ -11,104 +11,136 @@
       background: linear-gradient(120deg, #e6eafc 0%, #fafafa 100%);
       min-height: 100vh;
     }
-    .liberacao-card {
+    .container-custom {
       background: #fff;
       border-radius: 18px;
-      box-shadow: 0 6px 32px rgba(0,0,0,0.14);
+      box-shadow: 0 6px 28px rgba(55,90,127,0.09);
       padding: 2.5rem 2rem 2rem 2rem;
-      max-width: 650px;
+      max-width: 600px;
       margin: 40px auto;
       border: none;
     }
-    .section-title {
+    .page-title {
       color: #375a7f;
       font-weight: 700;
       margin-bottom: 1.3rem;
       letter-spacing: 0.01em;
       font-size: 1.25rem;
     }
-    .painel-assentos .badge {
-      font-size: 1rem;
-      margin-right: 6px;
-      margin-bottom: 4px;
-    }
-    .painel-assentos {
-      margin-bottom: 18px;
-    }
-    .status-livre { background-color: #28a745; color: #fff; }
-    .status-ocupado { background-color: #dc3545; color: #fff; }
-    .status-indisponivel { background-color: #6c757d; color: #fff; }
-    .form-section { border-left: 3px solid #007bff; padding-left: 18px; margin-top: 25px; }
-    .btn-block { margin-bottom: 10px; }
-    @media (max-width: 700px) {
-      .liberacao-card { padding: 1rem 0.5rem 1.4rem 0.5rem; }
-      .section-title { font-size: 1.07rem; }
+    .fade-in { animation: fadeIn .7s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .form-section { margin-bottom: 2rem; }
+    .btn-action { min-width: 120px; }
+    .admin-back { margin-bottom: 1.4rem; }
+    .step { display:none; }
+    .step.active { display:block; }
+    @media (max-width: 600px) {
+      .container-custom { padding: 1.2rem 0.5rem 1.7rem 0.5rem; }
+      .page-title { font-size: 1.1rem; }
     }
   </style>
 </head>
 <body>
-<div class="liberacao-card shadow fade-in">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="section-title"><i class="bi bi-person-check"></i> Liberação Dirigida de Assentos Especiais</span>
-    <button class="btn btn-outline-secondary btn-sm" onclick="voltarPainel()"><i class="bi bi-arrow-left"></i> Voltar ao Painel</button>
-  </div>
-  <!-- Passo 1: Seleção da Data -->
-  <div id="secSelecaoData">
-    <div class="form-group">
-      <label for="dataViagem"><strong>Data da Viagem</strong></label>
-      <input type="date" class="form-control" id="dataViagem" required>
+  <div class="container-custom shadow fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="page-title"><i class="bi bi-person-check"></i> Liberação Dirigida de Assento</span>
+      <button class="btn btn-outline-secondary btn-sm admin-back" onclick="voltarPainel()">
+        <i class="bi bi-arrow-left"></i> Voltar ao Painel
+      </button>
     </div>
-    <button type="button" id="btnVerStatus" class="btn btn-info btn-block mt-2"><i class="bi bi-search"></i> Verificar Status</button>
-    <div id="statusOnibus" class="alert alert-info py-2 text-center mt-3" style="display:none;"></div>
-    <div class="painel-assentos" id="painelAssentos" style="display:none;">
-      <label><strong>Status dos Assentos Especiais:</strong></label>
-      <span id="statusAssento43" class="badge status-livre">43 - Livre</span>
-      <span id="statusAssento44" class="badge status-livre">44 - Livre</span>
-      <span id="statusAssento45" class="badge status-livre">45 - Livre</span>
-      <span id="statusAssento46" class="badge status-livre">46 - Livre</span>
-    </div>
-    <button type="button" id="btnAgendar" class="btn btn-success btn-lg btn-block mt-4" style="display:none;"><i class="bi bi-plus-circle"></i> Agendar Liberação</button>
-  </div>
-  <!-- Passo 2: Escolha com ou sem acompanhante -->
-  <div id="secTipoFluxo" style="display:none;">
-    <div class="form-group">
-      <label><strong>Tipo de Liberação:</strong></label>
-      <div class="form-check form-check-inline ml-2">
-        <input class="form-check-input" type="radio" name="tipoFluxo" id="fluxoSemAcompanhante" value="sem" checked>
-        <label class="form-check-label" for="fluxoSemAcompanhante">Sem acompanhante</label>
-      </div>
-      <div class="form-check form-check-inline ml-3">
-        <input class="form-check-input" type="radio" name="tipoFluxo" id="fluxoComAcompanhante" value="com">
-        <label class="form-check-label" for="fluxoComAcompanhante">Com acompanhante</label>
-      </div>
-    </div>
-    <button type="button" id="btnIniciarFluxo" class="btn btn-primary btn-block">Prosseguir</button>
-  </div>
-  <!-- Passo 3: Formulário Sem Acompanhante -->
-  <form id="formSemAcompanhante" style="display:none;" autocomplete="off">
-    <div class="form-group">
-      <label for="nip"><strong>Buscar usuário por NIP</strong></label>
-      <div class="input-group">
-        <input type="text" class="form-control" id="nip" maxlength="8" required autocomplete="off" placeholder="Digite o NIP">
-        <div class="input-group-append">
-          <button type="button" id="btnBuscarUsuario" class="btn btn-info"><i class="bi bi-search"></i></button>
+
+    <!-- ETAPA 1: Escolha da Data -->
+    <div class="step active" id="step1">
+      <form onsubmit="verificarData(event)">
+        <div class="form-group">
+          <label for="dataViagem"><strong>Data da Viagem <span class="text-danger">*</span></strong></label>
+          <input type="date" id="dataViagem" class="form-control" required>
         </div>
+        <button class="btn btn-primary btn-block mt-2" type="submit">Verificar Disponibilidade</button>
+      </form>
+      <div id="infoData" class="mt-3" style="display:none;">
+        <div class="alert" id="msgInfoData"></div>
+        <div id="detalhesData" style="display:none;">
+          <ul class="list-group mb-2">
+            <li class="list-group-item py-2"><b>Destino:</b> <span id="destinoVal"></span></li>
+            <li class="list-group-item py-2"><b>Lotação máxima:</b> <span id="qtdAssentosVal"></span></li>
+            <li class="list-group-item py-2"><b>Passageiros agendados:</b> <span id="agendadosVal"></span></li>
+            <li class="list-group-item py-2"><b>Fila de espera:</b> <span id="reservasVal"></span></li>
+            <li class="list-group-item py-2"><b>Vagas disponíveis:</b> <span id="vagasVal"></span></li>
+            <li class="list-group-item py-2"><b>Status assentos especiais:</b>
+              <span id="esp43" class="badge"></span>
+              <span id="esp44" class="badge"></span>
+              <span id="esp45" class="badge"></span>
+              <span id="esp46" class="badge"></span>
+            </li>
+          </ul>
+          <div class="mb-2"><span id="lotacaoMsg"></span></div>
+        </div>
+        <button class="btn btn-success mt-2" onclick="irParaTipoLiberacao()" id="btnProsseguirTipoLiberacao" style="display:none;">Prosseguir</button>
       </div>
-      <div id="msgUsuario" class="text-danger text-center mt-2" style="display:none;"></div>
     </div>
-    <div id="dadosUsuario" style="display:none;">
-      <div class="form-row">
-        <div class="form-group col-md-4"><label for="nip2">NIP</label><input type="text" class="form-control" id="nip2" readonly></div>
-        <div class="form-group col-md-8"><label for="nome">Nome</label><input type="text" class="form-control" id="nome" readonly></div>
+
+    <!-- ETAPA 2: Tipo de Liberação -->
+    <div class="step" id="step2">
+      <p class="mb-2"><strong>Tipo de liberação:</strong></p>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="radio" name="tipoLiberacao" id="tipoSemAcomp" value="sem" checked>
+        <label class="form-check-label" for="tipoSemAcomp">Sem acompanhante</label>
       </div>
-      <div class="form-row">
-        <div class="form-group col-md-3"><label for="idade">Idade</label><input type="text" class="form-control" id="idade" readonly></div>
-        <div class="form-group col-md-3"><label for="celular">Celular</label><input type="text" class="form-control" id="celular" readonly></div>
-        <div class="form-group col-md-3"><label for="vinculo">Vínculo</label><input type="text" class="form-control" id="vinculo" readonly></div>
-        <div class="form-group col-md-3"><label for="dataViagem2">Data Viagem</label><input type="text" class="form-control" id="dataViagem2" readonly></div>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="radio" name="tipoLiberacao" id="tipoComAcomp" value="com">
+        <label class="form-check-label" for="tipoComAcomp">Com acompanhante</label>
       </div>
-      <div class="form-row">
-        <div class="form-group col-md-4"><label for="destino">Destino</label>
+      <button class="btn btn-primary btn-block" onclick="avancarEtapaUsuario()">Avançar</button>
+      <button class="btn btn-outline-secondary btn-block mt-2" onclick="voltarEtapa(1)">Voltar</button>
+    </div>
+
+    <!-- ETAPA 3: Dados do Titular (sem acompanhante) -->
+    <div class="step" id="step3sem">
+      <form id="formSemAcomp" onsubmit="enviarLiberacao(event)">
+        <div class="form-group">
+          <label for="nip"><strong>NIP do Usuário <span class="text-danger">*</span></strong></label>
+          <div class="input-group">
+            <input type="text" id="nip" class="form-control" maxlength="10" autocomplete="off" required>
+            <div class="input-group-append">
+              <button class="btn btn-info" type="button" onclick="buscarUsuarioSemAcomp()">Buscar</button>
+            </div>
+          </div>
+        </div>
+        <div id="dadosUsuario" style="display:none;">
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="nipUsuario">NIP</label>
+              <input type="text" id="nipUsuario" class="form-control" readonly>
+            </div>
+            <div class="form-group col-6">
+              <label for="nomeUsuario">Nome</label>
+              <input type="text" id="nomeUsuario" class="form-control" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="idadeUsuario">Idade</label>
+              <input type="text" id="idadeUsuario" class="form-control" readonly>
+            </div>
+            <div class="form-group col-4">
+              <label for="celularUsuario">Celular</label>
+              <input type="text" id="celularUsuario" class="form-control" readonly>
+            </div>
+            <div class="form-group col-4">
+              <label for="vinculoUsuario">Vínculo</label>
+              <input type="text" id="vinculoUsuario" class="form-control" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="pcdUsuario">PCD</label>
+              <input type="text" id="pcdUsuario" class="form-control" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="destino"><strong>Destino <span class="text-danger">*</span></strong></label>
           <select id="destino" class="form-control" required>
             <option value="">Selecione</option>
             <option value="HNMD">HNMD</option>
@@ -116,7 +148,8 @@
             <option value="OCM">OCM</option>
           </select>
         </div>
-        <div class="form-group col-md-4"><label for="tipoViagem">Tipo de Viagem</label>
+        <div class="form-group">
+          <label for="tipoViagem"><strong>Tipo de Viagem <span class="text-danger">*</span></strong></label>
           <select id="tipoViagem" class="form-control" required>
             <option value="">Selecione</option>
             <option value="Ida">Ida</option>
@@ -124,76 +157,73 @@
             <option value="Ida e Volta">Ida e Volta</option>
           </select>
         </div>
-        <div class="form-group col-md-4"><label for="assento">Assento</label>
+        <div class="form-group">
+          <label for="assento"><strong>Assento Especial <span class="text-danger">*</span></strong></label>
           <select id="assento" class="form-control" required>
             <option value="">Selecione</option>
-            <option value="43">43</option>
-            <option value="44">44</option>
-            <option value="45">45</option>
-            <option value="46">46</option>
+            <!-- Opções serão preenchidas por JS -->
           </select>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="justificativa"><strong>Justificativa da Liberação <span class="text-danger">*</span></strong></label>
-        <textarea id="justificativa" class="form-control" required rows="2" maxlength="180"></textarea>
-      </div>
-      <div class="text-center mt-3">
-        <button type="submit" class="btn btn-success btn-lg mr-2"><i class="bi bi-check2-circle"></i> Confirmar Liberação</button>
-      </div>
-      <div id="msgFinal" class="alert mt-4 text-center" style="display:none;"></div>
+        <div class="form-group">
+          <label for="justificativa"><strong>Justificativa da Liberação <span class="text-danger">*</span></strong></label>
+          <textarea id="justificativa" class="form-control" required rows="2" maxlength="180"></textarea>
+        </div>
+        <div class="form-group text-center">
+          <button class="btn btn-success btn-action" type="submit">
+            <i class="bi bi-check2-circle"></i> Confirmar Liberação
+          </button>
+        </div>
+        <div id="msgFinalSem" class="alert mt-4 text-center" style="display:none;"></div>
+        <button class="btn btn-outline-secondary btn-block mt-3" type="button" onclick="voltarEtapa(2)">Voltar</button>
+      </form>
     </div>
-  </form>
-  <!-- Passo 3: Formulário Com Acompanhante -->
-  <form id="formComAcompanhante" style="display:none;" autocomplete="off">
-    <div class="form-group">
-      <label for="nipComAcomp"><strong>Buscar usuário por NIP</strong></label>
-      <div class="input-group">
-        <input type="text" class="form-control" id="nipComAcomp" maxlength="8" required autocomplete="off" placeholder="Digite o NIP">
-        <div class="input-group-append">
-          <button type="button" id="btnBuscarUsuarioComAcomp" class="btn btn-info"><i class="bi bi-search"></i></button>
+
+    <!-- ETAPA 3: COM acompanhante -->
+    <div class="step" id="step3com">
+      <form id="formComAcomp" onsubmit="enviarLiberacao(event)">
+        <div class="form-group">
+          <label for="nipCom"><strong>NIP do Usuário <span class="text-danger">*</span></strong></label>
+          <div class="input-group">
+            <input type="text" id="nipCom" class="form-control" maxlength="10" autocomplete="off" required>
+            <div class="input-group-append">
+              <button class="btn btn-info" type="button" onclick="buscarUsuarioComAcomp()">Buscar</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div id="msgUsuarioComAcomp" class="text-danger text-center mt-2" style="display:none;"></div>
-    </div>
-    <div id="dadosUsuarioComAcomp" style="display:none;">
-      <div class="form-row">
-        <div class="form-group col-md-4"><label for="nipCom2">NIP</label><input type="text" class="form-control" id="nipCom2" readonly></div>
-        <div class="form-group col-md-8"><label for="nomeCom">Nome</label><input type="text" class="form-control" id="nomeCom" readonly></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-3"><label for="idadeCom">Idade</label><input type="text" class="form-control" id="idadeCom" readonly></div>
-        <div class="form-group col-md-3"><label for="celularCom">Celular</label><input type="text" class="form-control" id="celularCom" readonly></div>
-        <div class="form-group col-md-3"><label for="vinculoCom">Vínculo</label><input type="text" class="form-control" id="vinculoCom" readonly></div>
-        <div class="form-group col-md-3"><label for="dataViagemCom2">Data Viagem</label><input type="text" class="form-control" id="dataViagemCom2" readonly></div>
-      </div>
-      <h5 class="mt-3">Dados do Acompanhante</h5>
-      <div class="form-row">
-        <div class="form-group col-md-4">
-          <label for="acomp_nipcpf">NIP/CPF</label>
-          <input type="text" class="form-control" id="acomp_nipcpf">
+        <div id="dadosUsuarioCom" style="display:none;">
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="nipUsuarioCom">NIP</label>
+              <input type="text" id="nipUsuarioCom" class="form-control" readonly>
+            </div>
+            <div class="form-group col-6">
+              <label for="nomeUsuarioCom">Nome</label>
+              <input type="text" id="nomeUsuarioCom" class="form-control" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="idadeUsuarioCom">Idade</label>
+              <input type="text" id="idadeUsuarioCom" class="form-control" readonly>
+            </div>
+            <div class="form-group col-4">
+              <label for="celularUsuarioCom">Celular</label>
+              <input type="text" id="celularUsuarioCom" class="form-control" readonly>
+            </div>
+            <div class="form-group col-4">
+              <label for="vinculoUsuarioCom">Vínculo</label>
+              <input type="text" id="vinculoUsuarioCom" class="form-control" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="pcdUsuarioCom">PCD</label>
+              <input type="text" id="pcdUsuarioCom" class="form-control" readonly>
+            </div>
+          </div>
         </div>
-        <div class="form-group col-md-8">
-          <label for="acomp_nome">Nome do Acompanhante</label>
-          <input type="text" class="form-control" id="acomp_nome">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-3">
-          <label for="acomp_idade">Idade</label>
-          <input type="text" class="form-control" id="acomp_idade">
-        </div>
-        <div class="form-group col-md-4">
-          <label for="acomp_celular">Celular</label>
-          <input type="text" class="form-control" id="acomp_celular">
-        </div>
-        <div class="form-group col-md-5">
-          <label for="acomp_vinculo">Vínculo</label>
-          <input type="text" class="form-control" id="acomp_vinculo">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-4"><label for="destinoCom">Destino</label>
+        <div class="form-group">
+          <label for="destinoCom"><strong>Destino <span class="text-danger">*</span></strong></label>
           <select id="destinoCom" class="form-control" required>
             <option value="">Selecione</option>
             <option value="HNMD">HNMD</option>
@@ -201,7 +231,8 @@
             <option value="OCM">OCM</option>
           </select>
         </div>
-        <div class="form-group col-md-4"><label for="tipoViagemCom">Tipo de Viagem</label>
+        <div class="form-group">
+          <label for="tipoViagemCom"><strong>Tipo de Viagem <span class="text-danger">*</span></strong></label>
           <select id="tipoViagemCom" class="form-control" required>
             <option value="">Selecione</option>
             <option value="Ida">Ida</option>
@@ -209,247 +240,307 @@
             <option value="Ida e Volta">Ida e Volta</option>
           </select>
         </div>
-        <div class="form-group col-md-4"><label for="assentoCom">Assento</label>
-          <select id="assentoCom" class="form-control" required>
-            <option value="">Selecione</option>
-            <option value="43">43</option>
-            <option value="44">44</option>
-            <option value="45">45</option>
-            <option value="46">46</option>
-          </select>
+        <div class="form-group">
+          <label><strong>Assentos Especiais <span class="text-danger">*</span></strong></label>
+          <div class="row">
+            <div class="col">
+              <select id="assentoTitular" class="form-control" required>
+                <option value="">Titular</option>
+                <!-- Opções serão preenchidas por JS -->
+              </select>
+            </div>
+            <div class="col">
+              <select id="assentoAcomp" class="form-control" required>
+                <option value="">Acompanhante</option>
+                <!-- Opções serão preenchidas por JS -->
+              </select>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="justificativaCom"><strong>Justificativa da Liberação <span class="text-danger">*</span></strong></label>
-        <textarea id="justificativaCom" class="form-control" required rows="2" maxlength="180"></textarea>
-      </div>
-      <div class="text-center mt-3">
-        <button type="submit" class="btn btn-success btn-lg mr-2"><i class="bi bi-check2-circle"></i> Confirmar Liberação</button>
-      </div>
-      <div id="msgFinalCom" class="alert mt-4 text-center" style="display:none;"></div>
+        <hr>
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="acomp_nome"><strong>Nome do Acompanhante</strong></label>
+            <input type="text" id="acomp_nome" class="form-control" required>
+          </div>
+          <div class="form-group col-6">
+            <label for="acomp_nipcpf"><strong>NIP/CPF do Acompanhante</strong></label>
+            <input type="text" id="acomp_nipcpf" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-4">
+            <label for="acomp_idade">Idade</label>
+            <input type="number" id="acomp_idade" class="form-control" required>
+          </div>
+          <div class="form-group col-4">
+            <label for="acomp_celular">Celular</label>
+            <input type="text" id="acomp_celular" class="form-control" required>
+           </div>
+  <div class="form-group col-4">
+    <label for="acomp_vinculo">Vínculo</label>
+    <select id="acomp_vinculo" class="form-control" required>
+      <option value="">Selecione</option>
+      <option>Militar da Ativa</option>
+      <option>Veterano (militar da reserva)</option>
+      <option>Dependente</option>
+      <option>Pensionista</option>
+      <option>Civil</option>
+    </select>
+  </div>
+        </div>
+        <div class="form-group">
+          <label for="justificativaCom"><strong>Justificativa da Liberação <span class="text-danger">*</span></strong></label>
+          <textarea id="justificativaCom" class="form-control" required rows="2" maxlength="180"></textarea>
+        </div>
+        <div class="form-group text-center">
+          <button class="btn btn-success btn-action" type="submit">
+            <i class="bi bi-check2-circle"></i> Confirmar Liberação
+          </button>
+        </div>
+        <div id="msgFinalCom" class="alert mt-4 text-center" style="display:none;"></div>
+        <button class="btn btn-outline-secondary btn-block mt-3" type="button" onclick="voltarEtapa(2)">Voltar</button>
+      </form>
     </div>
-  </form>
-</div>
-<script>
-if (!sessionStorage.getItem("nipAdminOnibus")) {
-  window.location.href = "?page=loginAdminOnibus";
-}
-const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
-function voltarPainel() {
-  const a = document.createElement("a");
-  a.href = BASE_URL + "?page=adminOnibus";
-  a.target = "_top";
-  a.click();
-}
+  </div>
+  <script>
+    if (!sessionStorage.getItem("nipAdminOnibus")) {
+      window.location.href = "?page=loginAdminOnibus";
+    }
 
-// Estado global da data selecionada
-let dataSelecionada = "";
+    // Armazenar status dos especiais para preenchimento dinâmico dos selects
+    let statusEspeciaisGlobal = {};
 
-// Passo 1: Seleção da data e exibição das informações
-document.getElementById("btnVerStatus").onclick = function() {
-  document.getElementById("statusOnibus").style.display = "none";
-  document.getElementById("painelAssentos").style.display = "none";
-  document.getElementById("btnAgendar").style.display = "none";
-  dataSelecionada = document.getElementById("dataViagem").value;
-  if (!dataSelecionada) {
-    document.getElementById("statusOnibus").innerText = "Escolha uma data.";
-    document.getElementById("statusOnibus").style.display = "";
-    return;
-  }
-  google.script.run.withSuccessHandler(function(status) {
-    document.getElementById("painelAssentos").style.display = "";
-    for(let i of [43,44,45,46]) {
-      let el = document.getElementById('statusAssento'+i);
-      if (status[i].status === "ocupado") {
-        el.className = "badge status-ocupado";
-        el.innerText = i+" - Ocupado ("+status[i].nome+")";
+    // Função para voltar etapas no fluxo
+    function voltarEtapa(n) {
+      document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));
+      document.getElementById('step'+n).classList.add('active');
+    }
+    function irParaTipoLiberacao() {
+      document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));
+      document.getElementById('step2').classList.add('active');
+    }
+    function avancarEtapaUsuario() {
+      document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));
+      if(document.getElementById('tipoComAcomp').checked)
+        document.getElementById('step3com').classList.add('active');
+      else
+        document.getElementById('step3sem').classList.add('active');
+      preencherSelectEspeciais();
+    }
+
+    // Etapa 1: Verificar disponibilidade na ConfigOnibus e vagas
+    function verificarData(event) {
+      event.preventDefault();
+      const dataViagem = document.getElementById('dataViagem').value;
+      if (!dataViagem) return;
+      document.getElementById('infoData').style.display = 'none';
+      google.script.run
+        .withSuccessHandler(function(resultado) {
+          statusEspeciaisGlobal = resultado.statusEspeciais || {};
+          let msg = '';
+          let podeProsseguir = false;
+          if (!resultado || !resultado.ativa) {
+            msg = '<span class="text-danger"><b>Data não disponível para liberação dirigida!</b></span>';
+            document.getElementById('btnProsseguirTipoLiberacao').style.display = 'none';
+            document.getElementById('detalhesData').style.display = 'none';
+          } else {
+            // Preenche detalhes
+            document.getElementById('destinoVal').innerText = resultado.destino;
+            document.getElementById('qtdAssentosVal').innerText = resultado.qtdAssentos;
+            document.getElementById('agendadosVal').innerText = resultado.agendados;
+            document.getElementById('reservasVal').innerText = resultado.reservas;
+            document.getElementById('vagasVal').innerText = resultado.vagas;
+            ["43","44","45","46"].forEach(num => {
+              const el = document.getElementById('esp'+num);
+              el.innerText = num + ": " + (resultado.statusEspeciais[num] || "-");
+              el.className = "badge ml-1 " + (resultado.statusEspeciais[num] === "OCUPADO" ? "badge-danger" : "badge-success");
+            });
+
+            document.getElementById('detalhesData').style.display = "";
+            msg = '<span class="text-success"><b>Data disponível!</b></span>';
+            document.getElementById('btnProsseguirTipoLiberacao').style.display = '';
+            podeProsseguir = true;
+            document.getElementById('lotacaoMsg').innerHTML = resultado.lotado
+              ? '<span class="badge badge-danger">Ônibus lotado!</span>'
+              : '<span class="badge badge-success">Vagas disponíveis.</span>';
+          }
+          document.getElementById('msgInfoData').innerHTML = msg;
+          document.getElementById('msgInfoData').className = podeProsseguir ? 'alert alert-success' : 'alert alert-danger';
+          document.getElementById('infoData').style.display = '';
+        })
+        .withFailureHandler(function(err){
+          document.getElementById('msgInfoData').innerHTML = err.message || "Erro ao consultar data.";
+          document.getElementById('msgInfoData').className = 'alert alert-danger';
+          document.getElementById('infoData').style.display = '';
+          document.getElementById('btnProsseguirTipoLiberacao').style.display = 'none';
+          document.getElementById('detalhesData').style.display = 'none';
+        })
+        .consultarDisponibilidadeDataDirigida(dataViagem);
+    }
+
+    // Preencher selects dos assentos especiais apenas com livres
+    function preencherSelectEspeciais() {
+      let especs = ["43","44","45","46"];
+      let optionsLivres = especs.filter(num => statusEspeciaisGlobal[num] === "LIVRE");
+      let selectSem = document.getElementById('assento');
+      let selectTitular = document.getElementById('assentoTitular');
+      let selectAcomp = document.getElementById('assentoAcomp');
+      // Para sem acompanhante
+      if (selectSem) {
+        selectSem.innerHTML = '<option value="">Selecione</option>';
+        optionsLivres.forEach(num => {
+          selectSem.innerHTML += '<option value="'+num+'">'+num+'</option>';
+        });
+      }
+      // Para com acompanhante
+      if (selectTitular && selectAcomp) {
+        selectTitular.innerHTML = '<option value="">Titular</option>';
+        selectAcomp.innerHTML = '<option value="">Acompanhante</option>';
+        optionsLivres.forEach(num => {
+          selectTitular.innerHTML += '<option value="'+num+'">'+num+'</option>';
+          selectAcomp.innerHTML += '<option value="'+num+'">'+num+'</option>';
+        });
+      }
+    }
+
+    // Buscar usuário sem acompanhante
+    function buscarUsuarioSemAcomp() {
+      const nip = document.getElementById('nip').value.trim();
+      if (!nip) return setMsg('msgFinalSem', "Digite o NIP do usuário.", "danger");
+      google.script.run
+        .withSuccessHandler(function(usuario) {
+          if (!usuario) {
+            setMsg('msgFinalSem', "Usuário não encontrado.", "danger");
+            document.getElementById("dadosUsuario").style.display = "none";
+            return;
+          }
+          document.getElementById("nipUsuario").value = usuario.nip || "";
+          document.getElementById("nomeUsuario").value = usuario.nome || "";
+          document.getElementById("idadeUsuario").value = usuario.idade || "";
+          document.getElementById("celularUsuario").value = usuario.celular || "";
+          document.getElementById("vinculoUsuario").value = usuario.vinculo || "";
+          document.getElementById("pcdUsuario").value = usuario.pcd || "";
+          document.getElementById("dadosUsuario").style.display = "";
+          setMsg('msgFinalSem', "", "");
+        })
+        .withFailureHandler(function(error) {
+          setMsg('msgFinalSem', "Erro ao buscar usuário: " + (error.message || ""), "danger");
+          document.getElementById("dadosUsuario").style.display = "none";
+        })
+        .buscarUsuarioPorNip(nip);
+    }
+
+    // Buscar usuário com acompanhante (exibe todos os dados também)
+    function buscarUsuarioComAcomp() {
+      const nip = document.getElementById('nipCom').value.trim();
+      if (!nip) return setMsg('msgFinalCom', "Digite o NIP do usuário.", "danger");
+      google.script.run
+        .withSuccessHandler(function(usuario) {
+          if (!usuario) {
+            setMsg('msgFinalCom', "Usuário não encontrado.", "danger");
+            document.getElementById("dadosUsuarioCom").style.display = "none";
+            return;
+          }
+          document.getElementById("nipUsuarioCom").value = usuario.nip || "";
+          document.getElementById("nomeUsuarioCom").value = usuario.nome || "";
+          document.getElementById("idadeUsuarioCom").value = usuario.idade || "";
+          document.getElementById("celularUsuarioCom").value = usuario.celular || "";
+          document.getElementById("vinculoUsuarioCom").value = usuario.vinculo || "";
+          document.getElementById("pcdUsuarioCom").value = usuario.pcd || "";
+          document.getElementById("dadosUsuarioCom").style.display = "";
+          setMsg('msgFinalCom', "", "");
+        })
+        .withFailureHandler(function(error) {
+          setMsg('msgFinalCom', "Erro ao buscar usuário: " + (error.message || ""), "danger");
+          document.getElementById("dadosUsuarioCom").style.display = "none";
+        })
+        .buscarUsuarioPorNip(nip);
+    }
+
+    // Envio da liberação dirigida (sem ou com acompanhante)
+    function enviarLiberacao(event) {
+      event.preventDefault();
+      let comAcomp = document.getElementById('step3com').classList.contains('active');
+      let payload = {
+        admin: sessionStorage.getItem("nipAdminOnibus") || ""
+      };
+      if (!comAcomp) {
+        payload.dataViagem = document.getElementById('dataViagem').value;
+        payload.destino = document.getElementById('destino').value;
+        payload.tipoViagem = document.getElementById('tipoViagem').value;
+        payload.assento = document.getElementById('assento').value;
+        payload.nip = document.getElementById('nip').value.trim();
+        payload.justificativa = document.getElementById('justificativa').value.trim();
+        payload.acompanhante = "NÃO";
+        if (!payload.dataViagem || !payload.destino || !payload.tipoViagem || !payload.assento || !payload.nip || !payload.justificativa)
+          return setMsg('msgFinalSem', "Preencha todos os campos obrigatórios!", "danger");
+        setMsg('msgFinalSem', "Processando...", "info");
       } else {
-        el.className = "badge status-livre";
-        el.innerText = i+" - Livre";
+        payload.dataViagem = document.getElementById('dataViagem').value;
+        payload.destino = document.getElementById('destinoCom').value;
+        payload.tipoViagem = document.getElementById('tipoViagemCom').value;
+        payload.assento = document.getElementById('assentoTitular').value + "," + document.getElementById('assentoAcomp').value;
+        payload.nip = document.getElementById('nipCom').value.trim();
+        payload.justificativa = document.getElementById('justificativaCom').value.trim();
+        payload.acompanhante = "SIM";
+        payload.acomp_nome = document.getElementById('acomp_nome').value.trim();
+        payload.acomp_nipcpf = document.getElementById('acomp_nipcpf').value.trim();
+        payload.acomp_idade = document.getElementById('acomp_idade').value.trim();
+        payload.acomp_celular = document.getElementById('acomp_celular').value.trim();
+        payload.acomp_vinculo = document.getElementById('acomp_vinculo').value.trim();
+        if (!payload.dataViagem || !payload.destino || !payload.tipoViagem || !payload.assento || !payload.nip || !payload.justificativa ||
+            !payload.acomp_nome || !payload.acomp_nipcpf || !payload.acomp_idade || !payload.acomp_celular || !payload.acomp_vinculo)
+          return setMsg('msgFinalCom', "Preencha todos os campos obrigatórios!", "danger");
+        let [titu, acomp] = [document.getElementById('assentoTitular').value, document.getElementById('assentoAcomp').value];
+        if (titu === acomp && titu !== "") {
+          return setMsg('msgFinalCom', "O mesmo assento NÃO pode ser selecionado para titular e acompanhante!", "danger");
+        }
+        setMsg('msgFinalCom', "Processando...", "info");
       }
+      google.script.run
+        .withSuccessHandler(function(msg) {
+          if (!comAcomp) {
+            setMsg('msgFinalSem', msg || "Liberação realizada!", "success");
+            document.getElementById("formSemAcomp").reset();
+            document.getElementById("dadosUsuario").style.display = "none";
+          } else {
+            setMsg('msgFinalCom', msg || "Liberação realizada!", "success");
+            document.getElementById("formComAcomp").reset();
+            document.getElementById("dadosUsuarioCom").style.display = "none";
+          }
+          preencherSelectEspeciais();
+        })
+        .withFailureHandler(function(err) {
+          if (!comAcomp)
+            setMsg('msgFinalSem', err.message || "Erro ao liberar assento.", "danger");
+          else
+            setMsg('msgFinalCom', err.message || "Erro ao liberar assento.", "danger");
+        })
+        .liberarAssentoDirigido(payload);
     }
-    document.getElementById("statusOnibus").innerText = 
-      status.lotado ? "Ônibus LOTADO para esta data." : "Ônibus com vagas para esta data.";
-    document.getElementById("statusOnibus").style.display = "";
-    document.getElementById("btnAgendar").style.display = "";
-  }).getStatusAssentosEspeciais(dataSelecionada);
-};
 
-// Passo 2: Botão Agendar
-document.getElementById("btnAgendar").onclick = function() {
-  document.getElementById("secSelecaoData").style.display = "none";
-  document.getElementById("secTipoFluxo").style.display = "";
-};
-
-// Passo 2b: Escolha do tipo de fluxo (com/sem acompanhante)
-document.getElementById("btnIniciarFluxo").onclick = function() {
-  document.getElementById("secTipoFluxo").style.display = "none";
-  if (document.getElementById("fluxoSemAcompanhante").checked) {
-    document.getElementById("formSemAcompanhante").style.display = "";
-    document.getElementById("dadosUsuario").style.display = "none";
-    document.getElementById("nip").value = "";
-    document.getElementById("nip2").value = "";
-  } else {
-    document.getElementById("formComAcompanhante").style.display = "";
-    document.getElementById("dadosUsuarioComAcomp").style.display = "none";
-    document.getElementById("nipComAcomp").value = "";
-    document.getElementById("nipCom2").value = "";
-  }
-};
-
-// Fluxo SEM acompanhante
-document.getElementById("btnBuscarUsuario").onclick = function() {
-  const nip = document.getElementById("nip").value.trim();
-  if (!nip) {
-    document.getElementById("msgUsuario").innerText = "Digite o NIP!";
-    document.getElementById("msgUsuario").style.display = "";
-    return;
-  }
-  document.getElementById("msgUsuario").style.display = "none";
-  google.script.run.withSuccessHandler(function(usuario) {
-    if (!usuario) {
-      document.getElementById("msgUsuario").innerText = "Usuário não encontrado!";
-      document.getElementById("msgUsuario").style.display = "";
-      document.getElementById("dadosUsuario").style.display = "none";
-      return;
-    }
-    document.getElementById("nip2").value = nip;
-    document.getElementById("nome").value = usuario.NOME || "";
-    document.getElementById("idade").value = usuario.IDADE || "";
-    document.getElementById("celular").value = usuario.CELULAR || "";
-    document.getElementById("vinculo").value = usuario.VINCULO || "";
-    document.getElementById("dataViagem2").value = dataSelecionada;
-    document.getElementById("dadosUsuario").style.display = "";
-    // Bloqueia assentos ocupados
-    google.script.run.withSuccessHandler(function(status) {
-      for(let i of [43,44,45,46]) {
-        const opt = document.querySelector('#assento option[value="'+i+'"]');
-        if (opt) opt.disabled = (status[i].status === "ocupado");
+    function setMsg(id, msg, tipo) {
+      const el = document.getElementById(id);
+      let cor = "";
+      switch (tipo) {
+        case "success": cor = "alert-success"; break;
+        case "danger": cor = "alert-danger"; break;
+        case "info": cor = "alert-info"; break;
+        default: cor = "alert-secondary";
       }
-    }).getStatusAssentosEspeciais(dataSelecionada);
-  }).buscarUsuarioPorNip(nip);
-};
-
-// Envio do formulário sem acompanhante
-document.getElementById("formSemAcompanhante").onsubmit = function(e) {
-  e.preventDefault();
-  document.getElementById("msgFinal").style.display = "none";
-  const nip = document.getElementById("nip2").value;
-  const destino = document.getElementById("destino").value;
-  const tipoViagem = document.getElementById("tipoViagem").value;
-  const assento = document.getElementById("assento").value;
-  const justificativa = document.getElementById("justificativa").value.trim();
-  if (!nip || !dataSelecionada || !destino || !tipoViagem || !assento || !justificativa) {
-    document.getElementById("msgFinal").innerText = "Preencha todos os campos obrigatórios!";
-    document.getElementById("msgFinal").className = "alert alert-danger mt-4 text-center";
-    document.getElementById("msgFinal").style.display = "";
-    return false;
-  }
-  google.script.run.withSuccessHandler(function(msg) {
-    document.getElementById("msgFinal").innerText = msg || "Liberação realizada!";
-    document.getElementById("msgFinal").className = "alert alert-success mt-4 text-center";
-    document.getElementById("msgFinal").style.display = "";
-    document.getElementById("formSemAcompanhante").reset();
-    document.getElementById("dadosUsuario").style.display = "none";
-  }).withFailureHandler(function(err) {
-    document.getElementById("msgFinal").innerText = err.message || "Erro ao liberar assento.";
-    document.getElementById("msgFinal").className = "alert alert-danger mt-4 text-center";
-    document.getElementById("msgFinal").style.display = "";
-  }).liberarAssentoDirigido({
-    nip: nip,
-    dataViagem: dataSelecionada,
-    destino: destino,
-    tipoViagem: tipoViagem,
-    assento: assento,
-    justificativa: justificativa,
-    admin: sessionStorage.getItem("nipAdminOnibus") || "",
-    acompanhante: "NÃO"
-  });
-  return false;
-};
-
-// Fluxo COM acompanhante
-document.getElementById("btnBuscarUsuarioComAcomp").onclick = function() {
-  const nip = document.getElementById("nipComAcomp").value.trim();
-  if (!nip) {
-    document.getElementById("msgUsuarioComAcomp").innerText = "Digite o NIP!";
-    document.getElementById("msgUsuarioComAcomp").style.display = "";
-    return;
-  }
-  document.getElementById("msgUsuarioComAcomp").style.display = "none";
-  google.script.run.withSuccessHandler(function(usuario) {
-    if (!usuario) {
-      document.getElementById("msgUsuarioComAcomp").innerText = "Usuário não encontrado!";
-      document.getElementById("msgUsuarioComAcomp").style.display = "";
-      document.getElementById("dadosUsuarioComAcomp").style.display = "none";
-      return;
+      el.className = "alert mt-4 text-center " + cor;
+      el.style.display = msg ? "" : "none";
+      el.innerHTML = msg || "";
     }
-    document.getElementById("nipCom2").value = nip;
-    document.getElementById("nomeCom").value = usuario.NOME || "";
-    document.getElementById("idadeCom").value = usuario.IDADE || "";
-    document.getElementById("celularCom").value = usuario.CELULAR || "";
-    document.getElementById("vinculoCom").value = usuario.VINCULO || "";
-    document.getElementById("dataViagemCom2").value = dataSelecionada;
-    document.getElementById("dadosUsuarioComAcomp").style.display = "";
-    // Bloqueia assentos ocupados
-    google.script.run.withSuccessHandler(function(status) {
-      for(let i of [43,44,45,46]) {
-        const opt = document.querySelector('#assentoCom option[value="'+i+'"]');
-        if (opt) opt.disabled = (status[i].status === "ocupado");
-      }
-    }).getStatusAssentosEspeciais(dataSelecionada);
-  }).buscarUsuarioPorNip(nip);
-};
 
-document.getElementById("formComAcompanhante").onsubmit = function(e) {
-  e.preventDefault();
-  document.getElementById("msgFinalCom").style.display = "none";
-  const nip = document.getElementById("nipCom2").value;
-  const destino = document.getElementById("destinoCom").value;
-  const tipoViagem = document.getElementById("tipoViagemCom").value;
-  const assento = document.getElementById("assentoCom").value;
-  const justificativa = document.getElementById("justificativaCom").value.trim();
-  const acomp_nipcpf = document.getElementById("acomp_nipcpf").value.trim();
-  const acomp_nome = document.getElementById("acomp_nome").value.trim();
-  const acomp_idade = document.getElementById("acomp_idade").value.trim();
-  const acomp_celular = document.getElementById("acomp_celular").value.trim();
-  const acomp_vinculo = document.getElementById("acomp_vinculo").value.trim();
-  if (!nip || !dataSelecionada || !destino || !tipoViagem || !assento || !justificativa ||
-      !acomp_nipcpf || !acomp_nome || !acomp_idade || !acomp_celular || !acomp_vinculo) {
-    document.getElementById("msgFinalCom").innerText = "Preencha todos os campos obrigatórios!";
-    document.getElementById("msgFinalCom").className = "alert alert-danger mt-4 text-center";
-    document.getElementById("msgFinalCom").style.display = "";
-    return false;
-  }
-  google.script.run.withSuccessHandler(function(msg) {
-    document.getElementById("msgFinalCom").innerText = msg || "Liberação realizada!";
-    document.getElementById("msgFinalCom").className = "alert alert-success mt-4 text-center";
-    document.getElementById("msgFinalCom").style.display = "";
-    document.getElementById("formComAcompanhante").reset();
-    document.getElementById("dadosUsuarioComAcomp").style.display = "none";
-  }).withFailureHandler(function(err) {
-    document.getElementById("msgFinalCom").innerText = err.message || "Erro ao liberar assento.";
-    document.getElementById("msgFinalCom").className = "alert alert-danger mt-4 text-center";
-    document.getElementById("msgFinalCom").style.display = "";
-  }).liberarAssentoDirigido({
-    nip: nip,
-    dataViagem: dataSelecionada,
-    destino: destino,
-    tipoViagem: tipoViagem,
-    assento: assento,
-    justificativa: justificativa,
-    admin: sessionStorage.getItem("nipAdminOnibus") || "",
-    acompanhante: "SIM",
-    acomp_nipcpf: acomp_nipcpf,
-    acomp_nome: acomp_nome,
-    acomp_idade: acomp_idade,
-    acomp_celular: acomp_celular,
-    acomp_vinculo: acomp_vinculo
-  });
-  return false;
-};
-</script>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec/exec";
+    function voltarPainel() {
+      const a = document.createElement("a");
+      a.href = BASE_URL + "?page=adminOnibus";
+      a.target = "_top";
+      a.click();
+    }
+  </script>
 </body>
 </html>
