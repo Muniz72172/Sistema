@@ -1,4 +1,4 @@
-<!-- Arquivo: html.loginAdmin.html | Otimizado para uso em celular -->
+<!-- Arquivo: loginAdmin.html.txt | Otimizado para uso em celular -->
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -136,7 +136,7 @@
           sessionStorage.setItem("nipAdminOnibus", nip);
           sessionStorage.setItem("nomeAdminOnibus", resposta.nome || "");
           // Redirecionamento absoluto igual ao sistema exemplo:
-          const destino = "?page=adminOnibus";
+          const destino = "?page=menuAdminOnibus";
           const a = document.createElement("a");
           a.href = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec" + destino;
           a.target = "_top";
