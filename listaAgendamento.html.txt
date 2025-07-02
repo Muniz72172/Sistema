@@ -1,3 +1,6 @@
+<!-- listaAgendamento.html.txt -->
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -373,7 +376,7 @@
     const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
     function voltarPainel() {
       const a = document.createElement("a");
-      a.href = BASE_URL + "?page=adminOnibus";
+      a.href = BASE_URL + "?page=menuAdminOnibus";
       a.target = "_top";
       a.click();
     }
