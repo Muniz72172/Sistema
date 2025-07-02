@@ -1,5 +1,4 @@
-<!-- adminOnibus.html.txt -->
-
+<!-- menuAdminOnibus.html -->
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -100,8 +99,8 @@
     <div>
       <div class="admin-section-title">Gerenciamento</div>
       <button type="button" onclick="irPara('gerenciarDatas')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-calendar2-event"></i> Gerenciar Datas de Agendamento</button>
-      <button type="button" onclick="irPara('listarAgendados')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-people"></i> Listar Passageiros Agendados</button>
-      <button type="button" onclick="irPara('filaEsperaAdmin')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-hourglass-split"></i> Listar Fila de Espera</button>
+      <!-- Nova opção: Lista de Agendamentos -->
+      <button type="button" onclick="irPara('listaAgendamentos')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-list-ul"></i> Lista de Agendamentos</button>
       <button type="button" onclick="irPara('liberacaoDirigida')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-person-check"></i> Liberação Dirigida de Assento</button>
       <button type="button" onclick="irPara('listaPresenca')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-clipboard-check"></i> Gerar Lista de Presença</button>
       <div class="admin-section-title">Outros Recursos</div>
