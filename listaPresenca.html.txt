@@ -1,0 +1,88 @@
+<!-- listaPresenca.html.txt -->
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Presença - Ônibus</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    @media print {
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body class="bg-white">
+  <div class="container py-4">
+    <div class="no-print mb-4">
+      <h4 class="mb-3">Gerar Lista de Presença</h4>
+      <div class="form-inline mb-3">
+        <label class="mr-2" for="data">Data:</label>
+        <input type="date" id="data" class="form-control mr-2">
+        <label class="mr-2" for="destino">Destino:</label>
+        <select id="destino" class="form-control mr-2">
+          <option value="">Selecione</option>
+          <option value="HNMD">HNMD</option>
+          <option value="PNNSG">PNNSG</option>
+          <option value="OCM">OCM</option>
+        </select>
+        <button class="btn btn-primary" onclick="gerarLista()">Gerar</button>
+        <button class="btn btn-outline-secondary ml-2" onclick="window.print()">Imprimir</button>
+      </div>
+    </div>
+
+    <table class="table table-bordered table-sm">
+      <thead>
+        <tr>
+          <th>Nº</th>
+          <th>NIP</th>
+          <th>Nome</th>
+          <th>Assento</th>
+          <th>PCD</th>
+          <th>Acompanhante</th>
+          <th>Assinatura</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaPresenca"></tbody>
+    </table>
+
+    <div class="no-print">
+      <a href="?page=adminOnibus" class="btn btn-secondary mt-3">Voltar</a>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem("nipAdminOnibus")) {
+      window.location.href = "?page=loginAdmin";
+    }
+
+    function gerarLista() {
+      const data = document.getElementById("data").value;
+      const destino = document.getElementById("destino").value;
+      if (!data || !destino) {
+        alert("Informe data e destino.");
+        return;
+      }
+      google.script.run.withSuccessHandler(function(lista) {
+        const tabela = document.getElementById("tabelaPresenca");
+        tabela.innerHTML = "";
+        lista.forEach((p, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${p.nip}</td>
+            <td>${p.nome}</td>
+            <td>${p.assento}</td>
+            <td>${p.pcd ? "Sim" : "Não"}</td>
+            <td>${p.acompanhante ? "Sim" : "Não"}</td>
+            <td></td>`;
+          tabela.appendChild(tr);
+        });
+        google.script.run.registrarEventoOnibus(data, destino, "Lista de Presença Gerada");
+      }).gerarListaPresenca(data, destino);
+    }
+  </script>
+</body>
+</html>
