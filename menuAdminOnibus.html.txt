@@ -103,6 +103,8 @@
       <button type="button" onclick="irPara('listaAgendamentos')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-list-ul"></i> Lista de Agendamentos</button>
       <button type="button" onclick="irPara('liberacaoDirigida')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-person-check"></i> Liberação Dirigida de Assento</button>
       <button type="button" onclick="irPara('listaPresenca')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-clipboard-check"></i> Gerar Lista de Presença</button>
+      <!-- Nova opção: Registrar Faltas -->
+      <button type="button" onclick="irPara('registrarFaltas')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-x-octagon"></i> Registrar Faltas</button>
       <div class="admin-section-title">Outros Recursos</div>
       <button type="button" onclick="irPara('relatorios')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-bar-chart-line"></i> Relatórios e Estatísticas</button>
       <button type="button" onclick="irPara('ajuda')" class="btn btn-light admin-btn btn-block text-left"><i class="bi bi-question-circle"></i> Ajuda / Suporte</button>
