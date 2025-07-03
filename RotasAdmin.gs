@@ -25,6 +25,8 @@ function doGet(e) {
       return HtmlService.createHtmlOutputFromFile('listaAgendamento.html');
     case 'registrarFaltas': // Nova rota adicionada
       return HtmlService.createHtmlOutputFromFile('registrarFaltas.html');
+      case 'relatorios': // Nova rota adicionada
+      return HtmlService.createHtmlOutputFromFile('relatorios.html');
     default:
       return HtmlService.createHtmlOutput('<h3>Página não encontrada</h3>');
   }
