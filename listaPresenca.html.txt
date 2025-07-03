@@ -5,84 +5,326 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Presença - Ônibus</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Lista de Presença do Ônibus</title>
   <style>
-    @media print {
-      .no-print { display: none; }
+    body {
+      background: linear-gradient(120deg, #e6eafc 0%, #fafafa 100%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
     }
+    .presenca-container {
+      width: 100vw;
+      max-width: 1200px;
+      margin: 50px auto 0 auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(55,90,127,0.11);
+      padding: 2.5rem 2.2rem 2.5rem 2.2rem;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .page-title {
+      color: #375a7f;
+      font-weight: 700;
+      font-size: 1.45rem;
+      letter-spacing: .01em;
+    }
+    .btn {
+      background: #375a7f;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 18px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      transition: background .18s;
+      margin-left: 6px;
+      cursor: pointer;
+      outline: none;
+    }
+    .btn-outline {
+      background: #fff;
+      color: #375a7f;
+      border: 2px solid #375a7f;
+    }
+    .btn:hover, .btn-outline:hover {
+      background: #20406a;
+      color: #fff;
+    }
+    .form-inline {
+      margin-bottom: 18px;
+      display: flex;
+      align-items: flex-end;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .form-inline label {
+      font-weight: 500;
+      font-size: 1.09rem;
+      margin-right: 4px;
+      color: #375a7f;
+    }
+    .form-inline input[type="date"] {
+      font-size: 1.07rem;
+      border-radius: 6px;
+      border: 1px solid #b7c4d9;
+      padding: 4px 9px;
+    }
+    .status-info {
+      color: #20406a;
+      font-size: 1.08rem;
+      margin-bottom: 10px;
+      margin-top: -10px;
+    }
+    .print-header {
+      display: none;
+      text-align: center;
+      margin-bottom: 8px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .print-header .titulo {
+      font-weight: bold;
+      font-size: 1.23rem;
+      margin-bottom: 0;
+    }
+    .print-header .info {
+      font-size: 1.08rem;
+    }
+    .presenca-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      margin: 0 auto;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .presenca-table th, .presenca-table td {
+      border: 1px solid #b2b2b2;
+      padding: 2px 4px;
+      font-size: 1.03rem;
+      vertical-align: middle;
+      text-align: center;
+      background: #fcfcfc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .presenca-table th {
+      background: #f1f5fa;
+      color: #375a7f;
+      font-weight: bold;
+    }
+    .presenca-table td.nome {
+      text-align: left;
+      padding-left: 8px;
+      width: 460px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .presenca-table td input.presenca {
+      width: 22px;
+      height: 18px;
+      font-size: 0.99rem;
+      text-align: center;
+      border: none;
+      background: transparent;
+    }
+    .reservas-titulo {
+      text-align: left;
+      font-weight: bold;
+      color: #375a7f;
+      padding-top: 10px;
+      padding-bottom: 2px;
+      font-size: 1.11rem;
+      background: none;
+      border: none;
+    }
+    .assento-travado {
+      background: #f8d7da !important;
+      color: #a94442 !important;
+      font-weight: bold;
+    }
+    /* Responsivo */
+    @media (max-width: 900px) {
+      .presenca-container { padding: 1.2rem 0.5rem 1.7rem 0.5rem; }
+      .header-bar { flex-direction: column; gap: 12px; }
+      .page-title { font-size: 1.16rem; }
+      .presenca-table th, .presenca-table td { font-size: 0.93rem; }
+      .presenca-table td.nome { width: 160px; }
+    }
+    @media print {
+      body { background: #fff !important; }
+      .no-print { display: none !important; }
+      .presenca-container { margin: 8px auto 0 auto; box-shadow: none; border-radius: 0; padding: 0;}
+      .print-header { display: block !important; margin-bottom: 2px; }
+      .presenca-table th, .presenca-table td { font-size: 10pt !important; padding: 1px 2px !important; }
+      .presenca-table td.nome { width: 470px !important; }
+      .presenca-table { page-break-inside: auto; }
+      .presenca-table tr { page-break-inside: avoid; page-break-after: auto; }
+      .presenca-table th, .presenca-table td {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+      .reservas-titulo { font-size: 1rem !important; color: #375a7f !important; padding-top: 4px !important;}
+      .assento-travado { background: #f8d7da !important; color: #a94442 !important; }
+    }
+    .gerado-em { color: #8a8a8a; font-size:0.97rem; text-align: right; margin-top: 8px;}
   </style>
 </head>
-<body class="bg-white">
-  <div class="container py-4">
-    <div class="no-print mb-4">
-      <h4 class="mb-3">Gerar Lista de Presença</h4>
-      <div class="form-inline mb-3">
-        <label class="mr-2" for="data">Data:</label>
-        <input type="date" id="data" class="form-control mr-2">
-        <label class="mr-2" for="destino">Destino:</label>
-        <select id="destino" class="form-control mr-2">
-          <option value="">Selecione</option>
-          <option value="HNMD">HNMD</option>
-          <option value="PNNSG">PNNSG</option>
-          <option value="OCM">OCM</option>
-        </select>
-        <button class="btn btn-primary" onclick="gerarLista()">Gerar</button>
-        <button class="btn btn-outline-secondary ml-2" onclick="window.print()">Imprimir</button>
-      </div>
+<body>
+  <div class="presenca-container">
+    <div class="header-bar no-print">
+      <span class="page-title"><i class="bi bi-clipboard-check"></i> Lista de Presença do Ônibus</span>
+      <button class="btn btn-outline" onclick="voltarPainel()">Voltar ao Painel</button>
     </div>
-
-    <table class="table table-bordered table-sm">
-      <thead>
-        <tr>
-          <th>Nº</th>
-          <th>NIP</th>
-          <th>Nome</th>
-          <th>Assento</th>
-          <th>PCD</th>
-          <th>Acompanhante</th>
-          <th>Assinatura</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaPresenca"></tbody>
-    </table>
-
-    <div class="no-print">
-      <a href="?page=adminOnibus" class="btn btn-secondary mt-3">Voltar</a>
+    <form class="form-inline no-print" onsubmit="gerarLista(); return false;">
+      <label for="data">Data:</label>
+      <input type="date" id="data" required>
+      <button class="btn" type="submit">Gerar</button>
+      <button class="btn btn-outline" type="button" onclick="window.print()">Imprimir</button>
+    </form>
+    <div id="statusMsg" class="status-info no-print"></div>
+    <div class="print-header" id="printHeader">
+      <div class="titulo">Lista de Presença do Ônibus</div>
+      <div class="info" id="printHeaderInfo"></div>
     </div>
+    <div id="tabelaPresencaPrint"></div>
+    <div class="no-print gerado-em">Gerado em <span id="horaGeracao"></span></div>
   </div>
-
   <script>
-    if (!sessionStorage.getItem("nipAdminOnibus")) {
-      window.location.href = "?page=loginAdmin";
+    // Use a navegação padrão do Apps Script webapp para voltar ao painel (corrige tela branca)
+    function voltarPainel() {
+      window.location.href = "?page=menuAdminOnibus";
     }
+    function pad2(n) { return n.toString().padStart(2, '0'); }
 
     function gerarLista() {
       const data = document.getElementById("data").value;
-      const destino = document.getElementById("destino").value;
-      if (!data || !destino) {
-        alert("Informe data e destino.");
-        return;
-      }
-      google.script.run.withSuccessHandler(function(lista) {
-        const tabela = document.getElementById("tabelaPresenca");
-        tabela.innerHTML = "";
-        lista.forEach((p, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${p.nip}</td>
-            <td>${p.nome}</td>
-            <td>${p.assento}</td>
-            <td>${p.pcd ? "Sim" : "Não"}</td>
-            <td>${p.acompanhante ? "Sim" : "Não"}</td>
-            <td></td>`;
-          tabela.appendChild(tr);
-        });
-        google.script.run.registrarEventoOnibus(data, destino, "Lista de Presença Gerada");
-      }).gerarListaPresenca(data, destino);
+      if (!data) return alert("Informe a data.");
+      document.getElementById("statusMsg").innerText = "Carregando lista...";
+      google.script.run.withSuccessHandler(function(configs) {
+        const dataObj = new Date(data + "T00:00:00");
+        const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+        const diaSemana = dias[dataObj.getDay()];
+        document.getElementById("printHeaderInfo").innerText = `${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)}, ${data.split('-').reverse().join('/')}`;
+        document.getElementById("printHeader").style.display = '';
+        google.script.run.withSuccessHandler(function(lista) {
+          // Mapeia ocupação por assento (1 a 46) e reservas
+          const assentos = {};
+          const reservas = [];
+          lista.forEach((p) => {
+            let assento = (p.assento || "").toString().trim();
+            if (/^R\d+$/i.test(assento)) {
+              reservas.push({ ...p, assento });
+            } else if (/^\d+$/.test(assento)) {
+              assentos[parseInt(assento, 10)] = p;
+            } else if (/^\d+,\d+$/.test(assento)) {
+              // Caso duplo (acompanhante), separa ambos
+              assento.split(',').forEach(a => {
+                assentos[parseInt(a.trim(), 10)] = p;
+              });
+            }
+          });
+
+          let html = `
+            <table class="presenca-table">
+              <tr>
+                <th style="width:36px;">P ou F</th>
+                <th style="width:92px;">NIP ou CPF</th>
+                <th style="width:470px; text-align:left; padding-left:8px;">NOME</th>
+                <th style="width:38px;">Idade</th>
+                <th style="width:68px;">Destino</th>
+                <th style="width:48px;">Assento</th>
+                <th style="width:92px;">Celular</th>
+                <th style="width:84px;">Vínculo</th>
+                <th style="width:90px;">Acompanhante</th>
+                <th style="width:72px;">Tipo de viagem</th>
+              </tr>
+          `;
+
+          // Assentos 1 a 46, em ordem crescente
+          for (let i = 1; i <= 46; i++) {
+            // Assentos 7 e 8 são travados (militar do ônibus)
+            if (i === 7 || i === 8) {
+              html += `<tr>
+                <td class="assento-travado"></td>
+                <td class="assento-travado"></td>
+                <td class="assento-travado" style="text-align:left;">(Assento reservado para militar do ônibus)</td>
+                <td class="assento-travado"></td>
+                <td class="assento-travado"></td>
+                <td class="assento-travado">${pad2(i)}</td>
+                <td class="assento-travado"></td>
+                <td class="assento-travado"></td>
+                <td class="assento-travado"></td>
+                <td class="assento-travado"></td>
+              </tr>`;
+            } else {
+              const p = assentos[i];
+              html += `<tr>
+                <td><input type="text" class="presenca" maxlength="1" autocomplete="off"></td>
+                <td>${p ? (p.nip || p.cpf || "") : ""}</td>
+                <td class="nome">${p ? (p.nome || "") : ""}</td>
+                <td>${p ? (p.idade || "") : ""}</td>
+                <td>${p ? (p.destino || "") : ""}</td>
+                <td>${pad2(i)}</td>
+                <td>${p ? (p.celular || "") : ""}</td>
+                <td>${p ? (p.vinculo || "") : ""}</td>
+                <td>${p ? (p.acompanhante || "") : ""}</td>
+                <td>${p ? (p.tipoViagem || p['tipo de viagem'] || "") : ""}</td>
+              </tr>`;
+            }
+          }
+
+          // RESERVAS (Fila de Espera)
+          if (reservas.length > 0) {
+            reservas.sort((a, b) => {
+              // R1 < R2 < R10 etc.
+              const numA = parseInt(a.assento.replace(/[^\d]/g, ''), 10);
+              const numB = parseInt(b.assento.replace(/[^\d]/g, ''), 10);
+              return numA - numB;
+            });
+            html += `<tr><td colspan="10" class="reservas-titulo">Reservas (Fila de Espera)</td></tr>`;
+            reservas.forEach((p) => {
+              html += `<tr>
+                <td><input type="text" class="presenca" maxlength="1" autocomplete="off"></td>
+                <td>${p.nip || p.cpf || ""}</td>
+                <td class="nome">${p.nome || ""}</td>
+                <td>${p.idade || ""}</td>
+                <td>${p.destino || ""}</td>
+                <td>${p.assento}</td>
+                <td>${p.celular || ""}</td>
+                <td>${p.vinculo || ""}</td>
+                <td>${p.acompanhante || ""}</td>
+                <td>${p.tipoViagem || p['tipo de viagem'] || ""}</td>
+              </tr>`;
+            });
+          }
+
+          html += `</table>`;
+          document.getElementById("tabelaPresencaPrint").innerHTML = html;
+          document.getElementById("statusMsg").innerText = "";
+          const agora = new Date();
+          document.getElementById("horaGeracao").innerText = agora.toLocaleString("pt-BR");
+        }).gerarListaPresencaCompleta(data);
+      }).getDatasConfigOnibus();
+    }
+     // CORREÇÃO DO BOTÃO VOLTAR AO PAINEL (igual gerenciarDatas)
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
+    function voltarPainel() {
+      const a = document.createElement("a");
+      a.href = BASE_URL + "?page=menuAdminOnibus";
+      a.target = "_top";
+      a.click();
     }
   </script>
+  <!-- Bootstrap Icons CDN para ícone do título (mantendo o padrão visual do sistema) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </body>
 </html>
