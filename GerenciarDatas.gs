@@ -1,281 +1,123 @@
-<!-- gerenciarDatas.html.txt -->
+// GerenciarDatas.gs
 
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerenciar Datas - Ônibus</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <style>
-    body {
-      background: linear-gradient(120deg, #e6eafc 0%, #fafafa 100%);
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 900px;
-    }
-    .rounded-card {
-      border-radius: 18px !important;
-      box-shadow: 0 6px 28px rgba(55,90,127,0.09);
-      background: #fff;
-    }
-    .section-title {
-      color: #375a7f;
-      font-weight: 700;
-      margin-bottom: 1.3rem;
-      letter-spacing: 0.01em;
-      font-size: 1.25rem;
-    }
-    .table th, .table td {
-      vertical-align: middle !important;
-      text-align: center;
-    }
-    .form-control:focus {
-      box-shadow: 0 0 0 2px #bce8ff;
-      border-color: #65bdfa;
-    }
-    .btn-primary {
-      background: #375a7f;
-      border-color: #375a7f;
-    }
-    .btn-primary:hover, .btn-primary:focus {
-      background: #28405e;
-      border-color: #28405e;
-    }
-    .badge-ativa {
-      background: #28a745;
-      color: #fff;
-      font-size: 1em;
-      padding: .5em 1em;
-      border-radius: 12px;
-    }
-    .badge-inativa {
-      background: #dc3545;
-      color: #fff;
-      font-size: 1em;
-      padding: .5em 1em;
-      border-radius: 12px;
-    }
-    .fade-in {
-      animation: fadeIn .7s;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .btn-action {
-      min-width: 90px;
-    }
-    @media (max-width: 900px) {
-      .container { max-width: 100vw; padding: 0 4px;}
-    }
-    @media (max-width: 575px) {
-      .form-row { flex-direction: column; }
-      .form-group { width: 100% !important; }
-      .btn-block { margin-top: 10px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container py-4">
-    <div class="rounded-card p-4 mb-4 shadow fade-in">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="section-title"><i class="bi bi-calendar2-event"></i> Gerenciar Datas de Agendamento</span>
-        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="voltarPainel()">
-  <i class="bi bi-arrow-left"></i> Voltar ao Painel
-</button>
+// Funções usadas na opção Gerenciar Datas de Agendamento (com validações e correção de datas)
 
-      </div>
-      <form id="formNovaData" class="mb-4" onsubmit="adicionarData(event)">
-        <div class="form-row align-items-end">
-          <div class="form-group col-lg-3 col-md-5 col-sm-6 col-12 mb-2">
-            <label for="novaData">Data<span class="text-danger">*</span></label>
-            <input type="date" id="novaData" class="form-control" required>
-          </div>
-          <div class="form-group col-lg-2 col-md-3 col-sm-6 col-12 mb-2">
-            <label for="novoDestino">Destino<span class="text-danger">*</span></label>
-            <input type="text" id="novoDestino" class="form-control" value="NORMAL" maxlength="15" required>
-          </div>
-          <div class="form-group col-lg-2 col-md-2 col-sm-4 col-6 mb-2">
-            <label for="novaQtdAssentos">Qtde. Assentos<span class="text-danger">*</span></label>
-            <input type="number" id="novaQtdAssentos" class="form-control" value="46" min="1" max="99" required>
-          </div>
-          <div class="form-group col-lg-2 col-md-2 col-sm-4 col-6 mb-2">
-            <label for="novoAtivo">Ativo<span class="text-danger">*</span></label>
-            <select id="novoAtivo" class="form-control">
-              <option value="SIM" selected>SIM</option>
-              <option value="NÃO">NÃO</option>
-            </select>
-          </div>
-          <div class="form-group col-lg-3 col-md-6 col-sm-12 col-12 mb-2">
-            <label for="novaObs">Observação</label>
-            <input type="text" id="novaObs" class="form-control" maxlength="50">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-12 text-right">
-            <button class="btn btn-primary" type="submit" title="Adicionar nova data">
-              <i class="bi bi-plus-circle"></i> Adicionar
-            </button>
-          </div>
-        </div>
-      </form>
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover table-sm bg-white shadow-sm mb-0">
-          <thead class="thead-light">
-            <tr>
-              <th>Data</th>
-              <th>Destino</th>
-              <th>Qtde. Assentos</th>
-              <th>Status</th>
-              <th>Observação</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaDatas"></tbody>
-        </table>
-      </div>
-      <div id="msg" style="min-height:28px;" class="text-center mt-2"></div>
-    </div>
-  </div>
-  <script>
-    if (!sessionStorage.getItem("nipAdminOnibus")) {
-      window.location.href = "?page=loginAdminOnibus";
+// Busca as datas conforme armazenadas na planilha, sempre no formato yyyy-MM-dd (ISO)
+function getDatasConfigOnibus() {
+  const aba = SpreadsheetApp.getActive().getSheetByName("ConfigOnibus");
+  const dados = aba.getDataRange().getValues();
+  const resultado = [];
+  for (let i = 1; i < dados.length; i++) {
+    let dataPlanilha = dados[i][0];
+    let dataISO = "";
+    if (typeof dataPlanilha === "string" && dataPlanilha.includes("/")) {
+      // dd/MM/yyyy
+      let [d, m, y] = dataPlanilha.split("/");
+      dataISO = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    } else if (dataPlanilha instanceof Date) {
+      dataISO = Utilities.formatDate(dataPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+      dataISO = dataPlanilha;
     }
-
-    function carregarDatas() {
-      google.script.run.withSuccessHandler(function(lista) {
-        const tabela = document.getElementById("tabelaDatas");
-        tabela.innerHTML = "";
-        if (!lista.length) {
-          tabela.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Nenhuma data cadastrada.</td></tr>`;
-        }
-        lista.forEach(item => {
-          const statusBadge = item.ativo
-            ? `<span class="badge badge-ativa">Ativa</span>`
-            : `<span class="badge badge-inativa">Inativa</span>`;
-          const tr = document.createElement("tr");
-          tr.classList.add('fade-in');
-          tr.innerHTML = `
-            <td>${formataDataBR(item.data)}</td>
-            <td>${item.destino}</td>
-            <td>${item.qtdAssentos}</td>
-            <td>${statusBadge}</td>
-            <td>${item.observacao || ""}</td>
-            <td>
-              <button class="btn btn-sm btn-action ${item.ativo ? 'btn-danger' : 'btn-success'} mb-1" onclick="alternarStatus('${item.data}')">
-                <i class="bi ${item.ativo ? 'bi-x-circle-fill' : 'bi-check-circle-fill'}"></i> ${item.ativo ? "Inativar" : "Ativar"}
-              </button>
-              <button class="btn btn-sm btn-outline-danger btn-action" onclick="removerData('${item.data}')">
-                <i class="bi bi-trash"></i> Remover
-              </button>
-            </td>`;
-          tabela.appendChild(tr);
-        });
-      }).getDatasConfigOnibus();
-    }
-
-    function formataDataBR(dataISO) {
-      if (!dataISO) return '';
-      const [y, m, d] = dataISO.split('-');
-      return `${d}/${m}/${y}`;
-    }
-
-    function alternarStatus(dataISO) {
-      setMsg("Aguarde...", "info");
-      google.script.run.withSuccessHandler(function(){
-        setMsg("Status atualizado com sucesso!", "success");
-        carregarDatas();
-      }).withFailureHandler(function(error){
-        setMsg(error.message || "Erro ao atualizar status.", "danger");
-        carregarDatas();
-      }).alternarStatusDataOnibus(dataISO);
-    }
-
-    function removerData(dataISO) {
-      if (confirm("Tem certeza que deseja remover esta data? Esta ação não pode ser desfeita.")) {
-        setMsg("Removendo...", "info");
-        google.script.run.withSuccessHandler(function(){
-          setMsg("Data removida com sucesso!", "success");
-          carregarDatas();
-        }).removerDataConfigOnibus(dataISO);
-      }
-    }
-
-    function adicionarData(e) {
-      e.preventDefault();
-      const data = document.getElementById("novaData").value;
-      const destino = document.getElementById("novoDestino").value.trim();
-      const qtdAssentos = document.getElementById("novaQtdAssentos").value;
-      const ativo = document.getElementById("novoAtivo").value;
-      const observacao = document.getElementById("novaObs").value.trim();
-
-      // Validação extra no frontend para sexta/sábado/domingo e duplicidade antes de enviar para o backend
-      if (!data || !destino || !qtdAssentos || !ativo) {
-        setMsg("Preencha todos os campos obrigatórios.", "danger");
-        return;
-      }
-
-      // Checa sexta (5), sábado (6) ou domingo (0)
-      let dataObj = new Date(data + "T00:00:00-03:00");
-      const diaSemana = dataObj.getDay();
-      if (diaSemana === 5 || diaSemana === 6 || diaSemana === 0) {
-        setMsg("Não é permitido cadastrar datas para sexta-feira, sábado ou domingo.", "danger");
-        return;
-      }
-
-      // Checa duplicidade no frontend (evita chamada desnecessária)
-      const linhas = document.querySelectorAll("#tabelaDatas tr");
-      for (let i = 0; i < linhas.length; i++) {
-        const tds = linhas[i].querySelectorAll("td");
-        if (tds.length && tds[0].textContent.trim() === formataDataBR(data)) {
-          setMsg("Já existe uma data cadastrada para " + tds[0].textContent.trim() + ".", "danger");
-          return;
-        }
-      }
-
-      setMsg("Adicionando...", "info");
-      google.script.run.withSuccessHandler(function() {
-        document.getElementById("formNovaData").reset();
-        document.getElementById("novoDestino").value = "NORMAL";
-        document.getElementById("novaQtdAssentos").value = "46";
-        document.getElementById("novoAtivo").value = "SIM";
-        setMsg("Data adicionada com sucesso!", "success");
-        carregarDatas();
-      }).withFailureHandler(function(error) {
-        setMsg(error.message || "Erro ao adicionar data.", "danger");
-      }).adicionarDataConfigOnibusCompleto(data, destino, qtdAssentos, ativo, observacao);
-    }
-
-    function setMsg(msg, tipo) {
-      const el = document.getElementById("msg");
-      let cor = "";
-      switch (tipo) {
-        case "success": cor = "#28a745"; break;
-        case "danger": cor = "#dc3545"; break;
-        case "info": cor = "#375a7f"; break;
-        default: cor = "#222";
-      }
-      el.innerHTML = msg ? `<span style="color:${cor}">${msg}</span>` : "";
-    }
-
-    window.onload = carregarDatas;
-  </script>
-
-<script>
-  const BASE_URL = "https://script.google.com/macros/s/AKfycbxpzHIaJ6KFkrwZlS0GXLOGPkToihoAi1nU-nLwsTVkGPEENXk5yTghdoVz8X3_Lhz_pA/exec";
-  function voltarPainel() {
-    const a = document.createElement("a");
-    a.href = BASE_URL + "?page=adminOnibus";
-    a.target = "_top";
-    a.click();
+    resultado.push({
+      data: dataISO,
+      destino: dados[i][1] || "",
+      qtdAssentos: dados[i][2] || "",
+      ativo: (dados[i][3] || "").toString().toUpperCase() === "SIM",
+      observacao: dados[i][4] || ""
+    });
   }
-</script>
+  return resultado;
+}
 
+// Função robusta para comparar datas e alternar o status
+function alternarStatusDataOnibus(dataISO) {
+  const aba = SpreadsheetApp.getActive().getSheetByName("ConfigOnibus");
+  const dados = aba.getDataRange().getValues();
 
-</body>
-</html>
+  // dataISO está no formato yyyy-MM-dd
+  for (let i = 1; i < dados.length; i++) {
+    let dataPlanilha = dados[i][0];
+    let dataPlanilhaISO = "";
+    if (typeof dataPlanilha === "string" && dataPlanilha.includes("/")) {
+      // dd/MM/yyyy
+      let [d, m, y] = dataPlanilha.split("/");
+      dataPlanilhaISO = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    } else if (dataPlanilha instanceof Date) {
+      dataPlanilhaISO = Utilities.formatDate(dataPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+      dataPlanilhaISO = dataPlanilha;
+    }
+    if (dataPlanilhaISO === dataISO) {
+      const novoValor = (dados[i][3] || "").toString().toUpperCase() === "SIM" ? "NÃO" : "SIM";
+      aba.getRange(i + 1, 4).setValue(novoValor);
+      break;
+    }
+  }
+}
+
+// Adiciona nova data, impede duplicidade e dias proibidos, grava sempre em dd/MM/yyyy
+function adicionarDataConfigOnibusCompleto(data, destino, qtdAssentos, ativo, observacao) {
+  const aba = SpreadsheetApp.getActive().getSheetByName("ConfigOnibus");
+  const dados = aba.getDataRange().getValues();
+
+  // Corrigir fuso horário e garantir data correta, sempre GMT-3
+  let dataObj = new Date(data + "T00:00:00-03:00");
+  if (isNaN(dataObj.getTime())) {
+    throw new Error("Data inválida.");
+  }
+
+  // Validar sexta/sab/dom: 5,6,0
+  const diaSemana = dataObj.getDay();
+  if (diaSemana === 5 || diaSemana === 6 || diaSemana === 0) {
+    throw new Error("Não é permitido cadastrar datas para sexta-feira, sábado ou domingo.");
+  }
+
+  // Validar duplicidade: comparar por yyyy-MM-dd
+  const dataISO = Utilities.formatDate(dataObj, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  for (let i = 1; i < dados.length; i++) {
+    let dataPlanilha = dados[i][0];
+    let dataPlanilhaISO = "";
+    if (typeof dataPlanilha === "string" && dataPlanilha.includes("/")) {
+      let [d, m, y] = dataPlanilha.split("/");
+      dataPlanilhaISO = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    } else if (dataPlanilha instanceof Date) {
+      dataPlanilhaISO = Utilities.formatDate(dataPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+      dataPlanilhaISO = dataPlanilha;
+    }
+    if (dataPlanilhaISO === dataISO) {
+      throw new Error("Já existe uma data cadastrada para " + Utilities.formatDate(dataObj, Session.getScriptTimeZone(), "dd/MM/yyyy") + ".");
+    }
+  }
+
+  const ultimaLinha = aba.getLastRow() + 1;
+  const dataFormatada = Utilities.formatDate(dataObj, Session.getScriptTimeZone(), "dd/MM/yyyy");
+  aba.getRange(ultimaLinha, 1).setValue(dataFormatada);
+  aba.getRange(ultimaLinha, 2).setValue(destino);
+  aba.getRange(ultimaLinha, 3).setValue(Number(qtdAssentos));
+  aba.getRange(ultimaLinha, 4).setValue(ativo);
+  aba.getRange(ultimaLinha, 5).setValue(observacao || "");
+}
+
+function removerDataConfigOnibus(dataISO) {
+  const aba = SpreadsheetApp.getActive().getSheetByName("ConfigOnibus");
+  const dados = aba.getDataRange().getValues();
+  for (let i = 1; i < dados.length; i++) {
+    let dataPlanilha = dados[i][0];
+    let dataPlanilhaISO = "";
+    if (typeof dataPlanilha === "string" && dataPlanilha.includes("/")) {
+      let [d, m, y] = dataPlanilha.split("/");
+      dataPlanilhaISO = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    } else if (dataPlanilha instanceof Date) {
+      dataPlanilhaISO = Utilities.formatDate(dataPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+      dataPlanilhaISO = dataPlanilha;
+    }
+    if (dataPlanilhaISO === dataISO) {
+      aba.deleteRow(i + 1);
+      break;
+    }
+  }
+}
