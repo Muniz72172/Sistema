@@ -40,7 +40,7 @@
       <div id="mensagem" class="text-danger mt-3 text-center"></div>
       <div id="mensagemOk" class="text-success mt-3 text-center"></div>
       <div class="text-center mt-3">
-        <a href="?page=loginAdminOnibus" class="small">Voltar ao login</a>
+        <a href="?page=loginAdmin" class="small">Voltar ao login</a>
       </div>
     </div>
   </div>
@@ -87,7 +87,7 @@
           sessionStorage.removeItem("nomeCadastroAdmin");
           sessionStorage.removeItem("emailCadastroAdmin");
           mensagemOkDiv.innerText = "Senha cadastrada com sucesso! Você já pode fazer login.";
-          setTimeout(() => { window.location.href = "?page=loginAdminOnibus"; }, 2000);
+          setTimeout(() => { window.location.href = "?page=loginAdmin"; }, 2000);
         } else {
           mensagemDiv.innerText = resposta && resposta.mensagem ? resposta.mensagem : "Erro ao cadastrar senha.";
         }
