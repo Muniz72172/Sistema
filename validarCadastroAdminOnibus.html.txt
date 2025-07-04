@@ -1,4 +1,4 @@
-<!-- html.validarCadastroAdminOnibus.html -->
+<!-- html.validarCadastroAdminOnibus.html.txt-->
 
 
 <!DOCTYPE html>
@@ -41,7 +41,7 @@
         <button class="btn btn-success btn-block" onclick="cadastrarSenha()">Cadastrar Senha</button>
       </div>
       <div class="text-center mt-3">
-        <a href="?page=loginAdminOnibus">Voltar ao login</a>
+        <a href="?page=loginAdmin">Voltar ao login</a>
       </div>
       <div id="mensagem" class="text-danger mt-3 text-center"></div>
       <div id="mensagemOk" class="text-success mt-3 text-center"></div>
@@ -101,7 +101,7 @@
       google.script.run.withSuccessHandler(function(resposta) {
         if (resposta && resposta.sucesso) {
           mensagemOkDiv.innerText = "Senha cadastrada com sucesso! Você já pode fazer login.";
-          setTimeout(() => { window.location.href = "?page=loginAdminOnibus"; }, 2000);
+          setTimeout(() => { window.location.href = "?page=loginAdmin"; }, 2000);
         } else {
           mensagemDiv.innerText = resposta && resposta.mensagem ? resposta.mensagem : "Erro ao cadastrar senha.";
         }
